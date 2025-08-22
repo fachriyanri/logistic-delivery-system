@@ -1,0 +1,54 @@
+CRITICAL - 2025-08-22 00:01:38 --> Error: Call to undefined method App\Services\PengirimanService::getShipmentWithDetails()
+[Method: GET, Route: pengiriman/delivery-note/KRM20160820001]
+in APPPATH\Controllers\PengirimanController.php on line 218.
+ 1 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PengirimanController->deliveryNote('KRM20160820001')
+ 2 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PengirimanController))
+ 3 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-08-22 00:01:45 --> Error: Call to undefined method App\Services\PengirimanService::getShipmentWithDetails()
+[Method: GET, Route: pengiriman/track/KRM20160820001]
+in APPPATH\Controllers\PengirimanController.php on line 547.
+ 1 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PengirimanController->track('KRM20160820001')
+ 2 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PengirimanController))
+ 3 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-08-22 00:01:52 --> Error: Call to undefined method App\Services\PengirimanService::getShipmentWithDetails()
+[Method: GET, Route: pengiriman/track/KRM20160820001]
+in APPPATH\Controllers\PengirimanController.php on line 547.
+ 1 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PengirimanController->track('KRM20160820001')
+ 2 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PengirimanController))
+ 3 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-08-22 00:04:51 --> Error: Call to undefined method App\Services\PengirimanService::getShipmentWithDetails()
+[Method: GET, Route: pengiriman/delivery-note/KRM20160820001]
+in APPPATH\Controllers\PengirimanController.php on line 218.
+ 1 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PengirimanController->deliveryNote('KRM20160820001')
+ 2 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PengirimanController))
+ 3 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-08-22 00:10:26 --> Error: Call to undefined method App\Services\PengirimanService::getShipmentWithDetails()
+[Method: GET, Route: pengiriman/track/KRM20160820001]
+in APPPATH\Controllers\PengirimanController.php on line 547.
+ 1 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PengirimanController->track('KRM20160820001')
+ 2 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PengirimanController))
+ 3 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-08-22 00:10:39 --> Error: Call to undefined method App\Services\PengirimanService::getShipmentWithDetails()
+[Method: GET, Route: pengiriman/delivery-note/KRM20160820001]
+in APPPATH\Controllers\PengirimanController.php on line 218.
+ 1 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PengirimanController->deliveryNote('KRM20160820001')
+ 2 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PengirimanController))
+ 3 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))

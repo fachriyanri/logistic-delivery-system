@@ -1,0 +1,201 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\KategoriModel;
+use App\Entities\KategoriEntity;
+
+class KategoriService
+{
+    protected KategoriModel $kategoriModel;
+
+    public function __construct()
+    {
+        $this->kategoriModel = new KategoriModel();
+    }
+
+    /**
+     * Get all categories with filtering and pagination
+     */
+    public function getAllCategories(array $filter = [], int $limit = 15, int $offset = 0, string $orderBy = 'id_kategori', string $orderType = 'ASC'): array
+    {
+        return $this->kategoriModel->getAllWithFilter($filter, $limit, $offset, $orderBy, $orderType);
+    }
+
+    /**
+     * Get category by ID
+     */
+    public function getCategoryById(string $id): ?KategoriEntity
+    {
+        return $this->kategoriModel->find($id);
+    }
+
+    /**
+     * Create new category
+     */
+    public function createCategory(array $data): array
+    {
+        $result = ['success' => false, 'message' => '', 'data' => null];
+
+        try {
+            // Generate ID if not provided
+            if (empty($data['id_kategori'])) {
+                $data['id_kategori'] = $this->kategoriModel->generateNextId();
+            }
+
+            // Validate data
+            if (!$this->kategoriModel->validate($data)) {
+                $result['message'] = implode(', ', $this->kategoriModel->errors());
+                return $result;
+            }
+
+            // Check if ID already exists
+            if ($this->kategoriModel->find($data['id_kategori'])) {
+                $result['message'] = 'ID Kategori sudah terdaftar';
+                return $result;
+            }
+
+            // Check if name already exists
+            if ($this->kategoriModel->isNameExists($data['nama'])) {
+                $result['message'] = 'Nama kategori sudah terdaftar';
+                return $result;
+            }
+
+            // Save category
+            if ($this->kategoriModel->insert($data)) {
+                $result['success'] = true;
+                $result['message'] = 'Kategori berhasil dibuat';
+                $result['data'] = $this->kategoriModel->find($data['id_kategori']);
+            } else {
+                $result['message'] = 'Gagal menyimpan kategori';
+            }
+
+        } catch (\Exception $e) {
+            $result['message'] = 'Terjadi kesalahan: ' . $e->getMessage();
+        }
+
+        return $result;
+    }
+
+    /**
+     * Update existing category
+     */
+    public function updateCategory(string $id, array $data): array
+    {
+        $result = ['success' => false, 'message' => '', 'data' => null];
+
+        try {
+            // Check if category exists
+            $existingCategory = $this->kategoriModel->find($id);
+            if (!$existingCategory) {
+                $result['message'] = 'Kategori tidak ditemukan';
+                return $result;
+            }
+
+            // Remove id_kategori from update data to prevent changing primary key
+            unset($data['id_kategori']);
+
+            // Validate data
+            $data['id_kategori'] = $id; // Add for validation context
+            if (!$this->kategoriModel->validate($data)) {
+                $result['message'] = implode(', ', $this->kategoriModel->errors());
+                return $result;
+            }
+            unset($data['id_kategori']); // Remove again for update
+
+            // Check if name already exists (excluding current record)
+            if (isset($data['nama']) && $this->kategoriModel->isNameExists($data['nama'], $id)) {
+                $result['message'] = 'Nama kategori sudah terdaftar';
+                return $result;
+            }
+
+            // Update category
+            if ($this->kategoriModel->update($id, $data)) {
+                $result['success'] = true;
+                $result['message'] = 'Kategori berhasil diperbarui';
+                $result['data'] = $this->kategoriModel->find($id);
+            } else {
+                $result['message'] = 'Gagal memperbarui kategori';
+            }
+
+        } catch (\Exception $e) {
+            $result['message'] = 'Terjadi kesalahan: ' . $e->getMessage();
+        }
+
+        return $result;
+    }
+
+    /**
+     * Delete category
+     */
+    public function deleteCategory(string $id): array
+    {
+        return $this->kategoriModel->deleteKategori($id);
+    }
+
+    /**
+     * Generate next category ID
+     */
+    public function generateNextId(): string
+    {
+        return $this->kategoriModel->generateNextId();
+    }
+
+    /**
+     * Get categories for dropdown/select options
+     */
+    public function getCategoriesForSelect(): array
+    {
+        $categories = $this->kategoriModel->orderBy('nama', 'ASC')->findAll();
+        $options = [];
+        
+        foreach ($categories as $category) {
+            $options[$category->id_kategori] = $category->nama;
+        }
+        
+        return $options;
+    }
+
+    /**
+     * Validate category data
+     */
+    public function validateCategoryData(array $data, string $id = ''): array
+    {
+        $errors = [];
+
+        // Validate required fields
+        if (empty($data['nama'])) {
+            $errors[] = 'Nama kategori harus diisi';
+        }
+
+        // Validate ID format if provided
+        if (!empty($data['id_kategori'])) {
+            if (strlen($data['id_kategori']) > 5) {
+                $errors[] = 'ID Kategori maksimal 5 karakter';
+            }
+            if (!preg_match('/^KTG\d{2}$/', $data['id_kategori'])) {
+                $errors[] = 'Format ID Kategori harus KTGxx (contoh: KTG01)';
+            }
+        }
+
+        // Validate name length
+        if (!empty($data['nama']) && strlen($data['nama']) > 30) {
+            $errors[] = 'Nama kategori maksimal 30 karakter';
+        }
+
+        // Validate description length
+        if (!empty($data['keterangan']) && strlen($data['keterangan']) > 150) {
+            $errors[] = 'Keterangan maksimal 150 karakter';
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Check if category can be deleted
+     */
+    public function canDelete(string $id): bool
+    {
+        return !$this->kategoriModel->isInUse($id);
+    }
+}
