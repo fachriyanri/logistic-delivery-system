@@ -97,6 +97,13 @@ $infoId = $id . '-info';
                                     </a>
                                 </li>
                                 <li>
+                                    <?php if (isset($options['exportExcelUrl'])): ?>
+                                    <a class="dropdown-item" 
+                                       href="<?= $options['exportExcelUrl'] ?>">
+                                        <i class="fas fa-file-excel me-2"></i>
+                                        Export Excel
+                                    </a>
+                                    <?php else: ?>
                                     <a class="dropdown-item" 
                                        href="#" 
                                        data-table="<?= $id ?>" 
@@ -104,6 +111,7 @@ $infoId = $id . '-info';
                                         <i class="fas fa-file-excel me-2"></i>
                                         Export Excel
                                     </a>
+                                    <?php endif; ?>
                                 </li>
                                 <li>
                                     <a class="dropdown-item" 
@@ -196,6 +204,11 @@ $infoId = $id . '-info';
                                             // Replace placeholders in URL with row data
                                             foreach ($row as $field => $value) {
                                                 $url = str_replace('{' . $field . '}', $value, $url);
+                                            }
+                                            
+                                            // Debug: Check URL replacement in development
+                                            if (ENVIRONMENT === 'development' && strpos($url, '{') !== false) {
+                                                error_log("URL placeholder not replaced: " . $url . " | Row data: " . json_encode($row));
                                             }
                                             ?>
                                             <a href="<?= $url ?>" 

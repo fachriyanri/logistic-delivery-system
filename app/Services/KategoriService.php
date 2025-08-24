@@ -31,6 +31,14 @@ class KategoriService
     }
 
     /**
+     * Check if category name exists (excluding current ID)
+     */
+    public function getCategoryByName(string $name, string $excludeId = ''): bool
+    {
+        return $this->kategoriModel->isNameExists($name, $excludeId);
+    }
+
+    /**
      * Create new category
      */
     public function createCategory(array $data): array
@@ -43,31 +51,28 @@ class KategoriService
                 $data['id_kategori'] = $this->kategoriModel->generateNextId();
             }
 
-            // Validate data
-            if (!$this->kategoriModel->validate($data)) {
-                $result['message'] = implode(', ', $this->kategoriModel->errors());
-                return $result;
-            }
-
-            // Check if ID already exists
-            if ($this->kategoriModel->find($data['id_kategori'])) {
+            // Check if ID already exists using direct database query
+            $db = \Config\Database::connect();
+            $existingCount = $db->table('kategori')->where('id_kategori', $data['id_kategori'])->countAllResults();
+            if ($existingCount > 0) {
                 $result['message'] = 'ID Kategori sudah terdaftar';
                 return $result;
             }
 
-            // Check if name already exists
-            if ($this->kategoriModel->isNameExists($data['nama'])) {
+            // Check if name already exists using direct database query
+            $existingNameCount = $db->table('kategori')->where('LOWER(nama)', strtolower($data['nama']))->countAllResults();
+            if ($existingNameCount > 0) {
                 $result['message'] = 'Nama kategori sudah terdaftar';
                 return $result;
             }
 
-            // Save category
-            if ($this->kategoriModel->insert($data)) {
+            // Save category using the new method that bypasses entity issues
+            if ($this->kategoriModel->insertCategory($data)) {
                 $result['success'] = true;
                 $result['message'] = 'Kategori berhasil dibuat';
                 $result['data'] = $this->kategoriModel->find($data['id_kategori']);
             } else {
-                $result['message'] = 'Gagal menyimpan kategori';
+                $result['message'] = 'Gagal menyimpan kategori ke database';
             }
 
         } catch (\Exception $e) {
@@ -92,30 +97,34 @@ class KategoriService
                 return $result;
             }
 
-            // Remove id_kategori from update data to prevent changing primary key
-            unset($data['id_kategori']);
-
-            // Validate data
-            $data['id_kategori'] = $id; // Add for validation context
-            if (!$this->kategoriModel->validate($data)) {
-                $result['message'] = implode(', ', $this->kategoriModel->errors());
-                return $result;
-            }
-            unset($data['id_kategori']); // Remove again for update
-
             // Check if name already exists (excluding current record)
             if (isset($data['nama']) && $this->kategoriModel->isNameExists($data['nama'], $id)) {
                 $result['message'] = 'Nama kategori sudah terdaftar';
                 return $result;
             }
 
+            // If ID is being changed, check if new ID exists
+            if (isset($data['id_kategori']) && $data['id_kategori'] !== $id) {
+                if ($this->kategoriModel->find($data['id_kategori'])) {
+                    $result['message'] = 'ID Kategori baru sudah terdaftar';
+                    return $result;
+                }
+            }
+
+            // Prepare update data (exclude id_kategori for safety)
+            $updateData = [
+                'nama' => $data['nama'],
+                'keterangan' => $data['keterangan'] ?? ''
+            ];
+
             // Update category
-            if ($this->kategoriModel->update($id, $data)) {
+            if ($this->kategoriModel->update($id, $updateData)) {
                 $result['success'] = true;
                 $result['message'] = 'Kategori berhasil diperbarui';
                 $result['data'] = $this->kategoriModel->find($id);
             } else {
-                $result['message'] = 'Gagal memperbarui kategori';
+                $errors = $this->kategoriModel->errors();
+                $result['message'] = !empty($errors) ? implode(', ', $errors) : 'Gagal memperbarui kategori';
             }
 
         } catch (\Exception $e) {
@@ -164,8 +173,12 @@ class KategoriService
         $errors = [];
 
         // Validate required fields
-        if (empty($data['nama'])) {
+        if (empty(trim($data['nama'] ?? ''))) {
             $errors[] = 'Nama kategori harus diisi';
+        }
+
+        if (empty(trim($data['id_kategori'] ?? ''))) {
+            $errors[] = 'ID Kategori harus diisi';
         }
 
         // Validate ID format if provided

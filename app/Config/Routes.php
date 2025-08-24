@@ -46,11 +46,19 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->get('kategori', 'KategoriController::index');
     $routes->get('kategori/manage', 'KategoriController::manage');
     $routes->get('kategori/manage/(:segment)', 'KategoriController::manage/$1');
+    $routes->get('kategori/simple', 'KategoriController::manageSimple');
+    $routes->get('kategori/simple/(:segment)', 'KategoriController::manageSimple/$1');
     $routes->post('kategori/save', 'KategoriController::save');
     $routes->get('kategori/delete/(:segment)', 'KategoriController::delete/$1');
+    $routes->post('kategori/delete/(:segment)', 'KategoriController::delete/$1');
     $routes->post('kategori/generate-code', 'KategoriController::generateCode');
     $routes->post('kategori/check-name', 'KategoriController::checkName');
     $routes->get('kategori/get-for-select', 'KategoriController::getForSelect');
+    $routes->get('kategori/exportExcel', 'KategoriController::exportExcel');
+    
+    // Debug routes (remove in production)
+    $routes->get('debug/kategori', 'DebugController::testKategori');
+    $routes->get('debug/delete/(:segment)', 'DebugController::testDelete/$1');
 
     // Barang Routes
     $routes->get('barang', 'BarangController::index');

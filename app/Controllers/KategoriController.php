@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Services\KategoriService;
 use CodeIgniter\HTTP\ResponseInterface;
 
+
 class KategoriController extends BaseController
 {
     protected KategoriService $kategoriService;
@@ -62,19 +63,45 @@ class KategoriController extends BaseController
             'title' => $id ? 'Edit Kategori' : 'Tambah Kategori',
             'isEdit' => !empty($id),
             'kategori' => null,
-            'autocode' => $this->kategoriService->generateNextId()
+            'autocode' => $this->kategoriService->generateNextId(),
+            'validation' => session('validation')
         ];
 
         if ($id) {
             $kategori = $this->kategoriService->getCategoryById($id);
             if (!$kategori) {
                 session()->setFlashdata('error', 'Kategori tidak ditemukan');
-                return redirect()->to('/kategori');
+                return redirect()->to('/kategori')->send();
             }
             $data['kategori'] = $kategori;
         }
 
         return view('kategori/manage', $data);
+    }
+
+    /**
+     * Show simplified form for creating/editing category (for debugging)
+     */
+    public function manageSimple(?string $id = null): string
+    {
+        $data = [
+            'title' => $id ? 'Edit Kategori (Simple)' : 'Tambah Kategori (Simple)',
+            'isEdit' => !empty($id),
+            'kategori' => null,
+            'autocode' => $this->kategoriService->generateNextId(),
+            'validation' => session('validation')
+        ];
+
+        if ($id) {
+            $kategori = $this->kategoriService->getCategoryById($id);
+            if (!$kategori) {
+                session()->setFlashdata('error', 'Kategori tidak ditemukan');
+                return redirect()->to('/kategori')->send();
+            }
+            $data['kategori'] = $kategori;
+        }
+
+        return view('kategori/manage_simple', $data);
     }
 
     /**
@@ -85,48 +112,52 @@ class KategoriController extends BaseController
         $post = $this->request->getPost();
         
         if (!$post) {
+            session()->setFlashdata('error', 'Data tidak valid');
             return redirect()->to('/kategori');
         }
 
-        $id = $post['id'] ?? '';
-        $action = $post['action'] ?? 'save';
-
         // Prepare data
         $data = [
-            'id_kategori' => $post['id_kategori'] ?? '',
-            'nama' => $post['nama'] ?? '',
-            'keterangan' => $post['keterangan'] ?? ''
+            'id_kategori' => trim($post['id_kategori'] ?? ''),
+            'nama' => trim($post['nama'] ?? ''),
+            'keterangan' => trim($post['keterangan'] ?? '')
         ];
 
+        // Determine if this is an edit or create operation
+        $isEdit = !empty($post['original_id']) || $this->kategoriService->getCategoryById($data['id_kategori']);
+        $originalId = $post['original_id'] ?? $data['id_kategori'];
+
         // Validate data
-        $errors = $this->kategoriService->validateCategoryData($data, $id);
+        $errors = $this->kategoriService->validateCategoryData($data, $isEdit ? $originalId : '');
         
         if (!empty($errors)) {
             session()->setFlashdata('error', implode('<br>', $errors));
-            return redirect()->to('/kategori/manage/' . $id)->withInput();
+            if ($isEdit) {
+                return redirect()->to('/kategori/manage/' . $originalId)->withInput();
+            } else {
+                return redirect()->to('/kategori/manage')->withInput();
+            }
         }
 
         // Save category
-        if (empty($id)) {
+        if ($isEdit) {
+            // Update existing category
+            $result = $this->kategoriService->updateCategory($originalId, $data);
+        } else {
             // Create new category
             $result = $this->kategoriService->createCategory($data);
-        } else {
-            // Update existing category
-            $result = $this->kategoriService->updateCategory($id, $data);
         }
 
         if ($result['success']) {
             session()->setFlashdata('success', $result['message']);
-            
-            if ($action === 'save') {
-                $redirectId = $result['data']->id_kategori ?? $id;
-                return redirect()->to('/kategori/manage/' . $redirectId);
-            } else {
-                return redirect()->to('/kategori');
-            }
+            return redirect()->to('/kategori');
         } else {
             session()->setFlashdata('error', $result['message']);
-            return redirect()->to('/kategori/manage/' . $id)->withInput();
+            if ($isEdit) {
+                return redirect()->to('/kategori/manage/' . $originalId)->withInput();
+            } else {
+                return redirect()->to('/kategori/manage')->withInput();
+            }
         }
     }
 
@@ -137,6 +168,15 @@ class KategoriController extends BaseController
     {
         if (empty($id)) {
             session()->setFlashdata('error', 'ID kategori tidak valid');
+            return redirect()->to('/kategori');
+        }
+
+        // Check if category exists using direct database query
+        $db = \Config\Database::connect();
+        $existingCount = $db->table('kategori')->where('id_kategori', $id)->countAllResults();
+        
+        if ($existingCount === 0) {
+            session()->setFlashdata('error', 'Kategori tidak ditemukan');
             return redirect()->to('/kategori');
         }
 
@@ -172,7 +212,7 @@ class KategoriController extends BaseController
         $name = $this->request->getPost('nama');
         $excludeId = $this->request->getPost('exclude_id') ?? '';
         
-        $exists = $this->kategoriService->getCategoryById($name) !== null;
+        $exists = $this->kategoriService->getCategoryByName($name, $excludeId);
         
         return $this->response->setJSON([
             'exists' => $exists
@@ -190,5 +230,53 @@ class KategoriController extends BaseController
             'success' => true,
             'data' => $categories
         ]);
+    }
+
+    /**
+     * Export categories to Excel
+     */
+    public function exportExcel(): ResponseInterface
+    {
+        // Get all categories without pagination
+        [$categories, $total] = $this->kategoriService->getAllCategories([], 0, 0);
+        
+        // Create Excel file using PhpSpreadsheet
+        $filename = 'kategori_' . date('Y-m-d_H-i-s') . '.xlsx';
+        
+        // Set proper headers for Excel download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        
+        // Create new Spreadsheet object
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        
+        // Set column headers
+        $sheet->setCellValue('A1', 'ID Kategori')
+              ->setCellValue('B1', 'Nama Kategori')
+              ->setCellValue('C1', 'Keterangan');
+        
+        // Add data
+        $row = 2;
+        foreach ($categories as $kategori) {
+            $sheet->setCellValue('A' . $row, $kategori->id_kategori)
+                  ->setCellValue('B' . $row, $kategori->nama)
+                  ->setCellValue('C' . $row, $kategori->keterangan ?? '');
+            $row++;
+        }
+        
+        // Auto-size columns
+        foreach (range('A', 'C') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+        
+        // Freeze the first row
+        $sheet->freezePane('A2');
+        
+        // Redirect output to a client's web browser (Xlsx)
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
     }
 }

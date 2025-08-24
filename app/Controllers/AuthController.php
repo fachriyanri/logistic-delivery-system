@@ -42,7 +42,7 @@ class AuthController extends BaseController
      * Shows the login page for user authentication. If user is already authenticated,
      * redirects to the dashboard. Includes CSRF token and validation services.
      * 
-     * @return string The rendered login view or redirect response
+     * @return string|\CodeIgniter\HTTP\RedirectResponse The rendered login view or redirect response
      * 
      * @example
      * // Access login page
@@ -51,7 +51,7 @@ class AuthController extends BaseController
      * @see view('auth/login') Login view template
      * @see isAuthenticated() Check if user is already logged in
      */
-    public function index(): string
+    public function index()
     {
         // Redirect to dashboard if already logged in
         if ($this->isAuthenticated()) {

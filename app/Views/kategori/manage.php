@@ -4,11 +4,17 @@
 <div class="container-fluid">
     <?php
     // Prepare form fields configuration
-    $formFields = [
-        'id' => [
+    $formFields = [];
+    
+    // Add hidden field for edit operations
+    if ($isEdit ?? false) {
+        $formFields['original_id'] = [
             'type' => 'hidden',
             'value' => $kategori->id_kategori ?? ''
-        ],
+        ];
+    }
+    
+    $formFields = array_merge($formFields, [
         'group_basic' => [
             'type' => 'group_start',
             'label' => 'Basic Information',
@@ -67,7 +73,7 @@
         'group_details_end' => [
             'type' => 'group_end'
         ]
-    ];
+    ]);
 
     // Set page actions for breadcrumb
     $pageActions = [
@@ -106,31 +112,14 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('categoryForm');
+    if (!form) return;
+    
     const idKategoriField = form.querySelector('[name="id_kategori"]');
     const namaField = form.querySelector('[name="nama"]');
     const keteranganField = form.querySelector('[name="keterangan"]');
     
-    // Auto-generate category ID from name (for new categories)
-    <?php if (!($isEdit ?? false)): ?>
-    if (namaField && idKategoriField) {
-        namaField.addEventListener('input', function() {
-            if (!idKategoriField.value || idKategoriField.value === '<?= $autocode ?>') {
-                // Generate ID from name
-                let generatedId = 'KTG';
-                const nameWords = this.value.trim().split(' ');
-                if (nameWords.length > 0 && nameWords[0]) {
-                    const firstWord = nameWords[0].substring(0, 2).toUpperCase();
-                    generatedId += firstWord.padEnd(2, '0');
-                } else {
-                    generatedId += '01';
-                }
-                
-                // Check if this ID already exists (you might want to implement this check)
-                idKategoriField.value = generatedId;
-            }
-        });
-    }
-    <?php endif; ?>
+    // ID is auto-incremented by the system (KTG01, KTG02, etc.)
+    // No need for auto-generation from category name
     
     // Add character counters
     function addCharacterCounter(field, maxLength) {
@@ -141,9 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
         counter.style.fontSize = '0.75rem';
         
         function updateCounter() {
-            const remaining = maxLength - field.value.length;
             const percentage = (field.value.length / maxLength) * 100;
-            
             counter.textContent = `${field.value.length}/${maxLength} characters`;
             
             if (percentage >= 90) {
@@ -161,54 +148,68 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Add character counters to fields
-    addCharacterCounter(namaField, 30);
-    addCharacterCounter(keteranganField, 150);
+    if (namaField) addCharacterCounter(namaField, 30);
+    if (keteranganField) addCharacterCounter(keteranganField, 150);
     
-    // Form validation enhancements
-    const formValidator = new FormValidator(form, {
-        realTimeValidation: true,
-        showToasts: true
-    });
-    
-    // Add custom validation rules
-    formValidator.addRule('id_kategori', {
-        type: 'custom',
-        validator: function(value, field) {
-            const pattern = /^KTG[0-9]{2}$/;
-            return {
-                valid: pattern.test(value),
-                message: 'Category ID must follow format KTGxx (e.g., KTG01)'
-            };
-        }
-    });
-    
-    formValidator.addRule('nama', {
-        type: 'custom',
-        validator: function(value, field) {
-            if (value.length < 3) {
-                return {
-                    valid: false,
-                    message: 'Category name must be at least 3 characters long'
-                };
-            }
-            return { valid: true, message: '' };
-        }
-    });
-    
-    // Handle form success
-    form.addEventListener('formSuccess', function(e) {
-        showToast('Category saved successfully!', 'success');
+    // Basic form validation
+    form.addEventListener('submit', function(e) {
+        let hasErrors = false;
         
-        // Redirect after a short delay
-        setTimeout(() => {
-            window.location.href = '<?= base_url('kategori') ?>';
-        }, 1500);
+        // Validate required fields
+        if (idKategoriField && !idKategoriField.value.trim()) {
+            hasErrors = true;
+            showFieldError(idKategoriField, 'ID Kategori harus diisi');
+        } else if (idKategoriField && !/^KTG[0-9]{2}$/.test(idKategoriField.value)) {
+            hasErrors = true;
+            showFieldError(idKategoriField, 'Format ID harus KTGxx (contoh: KTG01)');
+        }
+        
+        if (namaField && !namaField.value.trim()) {
+            hasErrors = true;
+            showFieldError(namaField, 'Nama kategori harus diisi');
+        } else if (namaField && namaField.value.length < 3) {
+            hasErrors = true;
+            showFieldError(namaField, 'Nama kategori minimal 3 karakter');
+        }
+        
+        if (hasErrors) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan...';
+        }
     });
     
-    // Handle form errors
-    form.addEventListener('formError', function(e) {
-        showToast('Please correct the errors and try again.', 'error');
-    });
+    function showFieldError(field, message) {
+        // Remove existing error
+        const existingError = field.parentNode.querySelector('.field-error');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        // Add error message
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'field-error text-danger mt-1';
+        errorDiv.style.fontSize = '0.875rem';
+        errorDiv.textContent = message;
+        field.parentNode.appendChild(errorDiv);
+        
+        // Add error styling to field
+        field.classList.add('is-invalid');
+        
+        // Remove error on input
+        field.addEventListener('input', function() {
+            field.classList.remove('is-invalid');
+            if (errorDiv.parentNode) {
+                errorDiv.remove();
+            }
+        }, { once: true });
+    }
 });
 </script>
 <?= $this->endSection() ?>

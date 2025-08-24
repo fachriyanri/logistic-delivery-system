@@ -18,11 +18,13 @@ class KategoriModel extends Model
         'keterangan'
     ];
 
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
+    protected $createdField = 'created_at';
+    protected $updatedField = 'updated_at';
 
     protected $validationRules = [
-        'id_kategori' => 'required|max_length[5]|is_unique[kategori.id_kategori,id_kategori,{id_kategori}]',
-        'nama' => 'required|max_length[30]|is_unique[kategori.nama,id_kategori,{id_kategori}]',
+        'id_kategori' => 'required|max_length[5]',
+        'nama' => 'required|max_length[30]',
         'keterangan' => 'permit_empty|max_length[150]'
     ];
 
@@ -132,12 +134,26 @@ class KategoriModel extends Model
     public function saveKategori(array $data, string $id = ''): bool
     {
         if (empty($id)) {
-            // Insert new category
-            return $this->insert($data) !== false;
+            // Insert new category using query builder to bypass entity issues
+            return $this->db->table($this->table)->insert($data);
         } else {
             // Update existing category
             return $this->update($id, $data);
         }
+    }
+
+    /**
+     * Insert category using raw query builder (bypasses entity issues)
+     */
+    public function insertCategory(array $data): bool
+    {
+        // Add timestamps if enabled
+        if ($this->useTimestamps) {
+            $data[$this->createdField] = date('Y-m-d H:i:s');
+            $data[$this->updatedField] = date('Y-m-d H:i:s');
+        }
+        
+        return $this->db->table($this->table)->insert($data);
     }
 
     /**
@@ -147,9 +163,11 @@ class KategoriModel extends Model
     {
         $result = ['success' => false, 'message' => ''];
 
-        // Check if category exists
-        $kategori = $this->find($id);
-        if (!$kategori) {
+        // Check if category exists using direct database query
+        $db = \Config\Database::connect();
+        $existingCount = $db->table($this->table)->where('id_kategori', $id)->countAllResults();
+        
+        if ($existingCount === 0) {
             $result['message'] = 'Kategori tidak ditemukan';
             return $result;
         }
@@ -160,8 +178,8 @@ class KategoriModel extends Model
             return $result;
         }
 
-        // Delete category
-        if ($this->delete($id)) {
+        // Delete category using direct database query
+        if ($db->table($this->table)->where('id_kategori', $id)->delete()) {
             $result['success'] = true;
             $result['message'] = 'Kategori berhasil dihapus';
         } else {

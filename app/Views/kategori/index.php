@@ -11,9 +11,11 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h3 class="card-title"><?= $title ?></h3>
-                    <a href="<?= base_url('kategori/manage') ?>" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Tambah Kategori
-                    </a>
+                    <div class="d-flex gap-2">
+                        <a href="<?= base_url('kategori/manage') ?>" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Tambah Kategori
+                        </a>
+                    </div>
                 </div>
                 
                 <div class="card-body">
@@ -83,21 +85,29 @@
                             $tableData[] = [
                                 'id_kategori' => $kategori->id_kategori,
                                 'nama' => $kategori->nama,
-                                'keterangan' => $kategori->keterangan
+                                'keterangan' => $kategori->keterangan ?? '',
+                                'edit_url' => base_url('kategori/manage/' . $kategori->id_kategori),
+                                'delete_url' => base_url('kategori/delete/' . $kategori->id_kategori)
                             ];
                         }
                     }
+                    
+                    // Debug: Check what data we're actually passing
+                    if (ENVIRONMENT === 'development' && !empty($tableData)) {
+                        echo "<!-- Debug table data: " . json_encode(array_slice($tableData, 0, 1)) . " -->";
+                    }
 
+                    // Use pre-generated URLs from table data
                     $tableActions = [
                         [
                             'title' => 'Edit',
-                            'url' => base_url('kategori/manage/{id_kategori}'),
+                            'url' => '{edit_url}',
                             'icon' => 'fas fa-edit',
                             'class' => 'btn-outline-warning'
                         ],
                         [
                             'title' => 'Delete',
-                            'url' => base_url('kategori/delete/{id_kategori}'),
+                            'url' => '{delete_url}',
                             'icon' => 'fas fa-trash',
                             'class' => 'btn-outline-danger',
                             'confirm' => 'Are you sure you want to delete this category?'
@@ -116,7 +126,10 @@
                             'paginated' => true,
                             'perPage' => 15,
                             'emptyMessage' => 'No categories found. Click "Add Category" to create your first category.',
-                            'class' => 'table-striped'
+                            'class' => 'table-striped',
+                            'options' => [
+                                'exportExcelUrl' => base_url('kategori/exportExcel')
+                            ]
                         ]) ?>
                     </div>
 
