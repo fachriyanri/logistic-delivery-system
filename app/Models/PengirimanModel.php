@@ -75,7 +75,7 @@ class PengirimanModel extends Model
     public function getAllWithFilter(array $filter = [], int $limit = 15, int $offset = 0, string $orderBy = 'id_pengiriman', string $orderType = 'DESC'): array
     {
         $builder = $this->db->table($this->table . ' pg');
-        $builder->select('pg.*, p.nama as pelanggan_nama, p.alamat as pelanggan_alamat, k.nama as kurir_nama');
+        $builder->select('pg.*, p.nama as nama_pelanggan, p.alamat as alamat_pelanggan, p.telepon as telepon_pelanggan, k.nama as nama_kurir, k.alamat as alamat_kurir, k.telepon as telepon_kurir');
         $builder->join('pelanggan p', 'p.id_pelanggan = pg.id_pelanggan', 'left');
         $builder->join('kurir k', 'k.id_kurir = pg.id_kurir', 'left');
 
@@ -86,6 +86,7 @@ class PengirimanModel extends Model
                     ->like('LOWER(pg.id_pengiriman)', $keyword)
                     ->orLike('LOWER(pg.no_po)', $keyword)
                     ->orLike('LOWER(pg.no_kendaraan)', $keyword)
+                    ->orLike('LOWER(pg.penerima)', $keyword)
                     ->orLike('LOWER(p.nama)', $keyword)
                     ->orLike('LOWER(k.nama)', $keyword)
                     ->groupEnd();
@@ -99,6 +100,10 @@ class PengirimanModel extends Model
         // Apply date range filter
         if (!empty($filter['from']) && !empty($filter['to'])) {
             $builder->where('pg.tanggal >=', $filter['from']);
+            $builder->where('pg.tanggal <=', $filter['to']);
+        } elseif (!empty($filter['from'])) {
+            $builder->where('pg.tanggal >=', $filter['from']);
+        } elseif (!empty($filter['to'])) {
             $builder->where('pg.tanggal <=', $filter['to']);
         }
 

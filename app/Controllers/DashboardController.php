@@ -27,16 +27,32 @@ class DashboardController extends BaseController
      */
     public function index(): string
     {
-        $user = $this->getCurrentUser();
+        $userLevel = session()->get('level');
+
+        // This is the robust check I recommended earlier.
+        // If for some reason the level is not in the session,
+        // the user is not properly logged in.
+        if (!$userLevel) {
+            return redirect()->to('/login')->with('error', 'Sesi Anda tidak valid. Silakan login kembali.');
+        } 
+        // Get role name for display
+        $roleNames = [1 => 'Admin', 2 => 'Finance', 3 => 'Gudang'];
+        $roleName = $roleNames[$userLevel] ?? 'User';
+        
+        // Set role_name in session for view
+        session()->set('role_name', strtolower($roleName));
         
         // Get dashboard statistics based on user role
         $data = [
             'title' => 'Dashboard',
             'meta_description' => 'Logistics Management System Dashboard',
-            'user' => $user,
-            'stats' => $this->getDashboardStats($user['level']),
-            'recent_activities' => $this->getRecentActivities($user['level']),
-            'pageActions' => $this->getPageActions($user['level'])
+            'userLevel' => $userLevel,
+            'roleName' => $roleName,
+            'stats' => $this->getDashboardStats($userLevel),
+            'recent_activities' => $this->getRecentActivities($userLevel),
+            'pageActions' => $this->getPageActions($userLevel),
+            'monthlyTrends' => $this->getMonthlyTrends(),
+            'statusDistribution' => $this->getStatusDistribution()
         ];
 
         return view('dashboard/index', $data);
@@ -51,9 +67,9 @@ class DashboardController extends BaseController
 
         // Common statistics for all users
         $stats['total_shipments'] = $this->pengirimanModel->countAll();
-        $stats['pending_shipments'] = $this->pengirimanModel->where('status', SHIPMENT_STATUS_PENDING)->countAllResults();
-        $stats['delivered_shipments'] = $this->pengirimanModel->where('status', SHIPMENT_STATUS_DELIVERED)->countAllResults();
-        $stats['in_transit_shipments'] = $this->pengirimanModel->where('status', SHIPMENT_STATUS_IN_TRANSIT)->countAllResults();
+        $stats['pending_shipments'] = $this->pengirimanModel->where('status', 1)->countAllResults(); // Pending
+        $stats['delivered_shipments'] = $this->pengirimanModel->where('status', 3)->countAllResults(); // Delivered  
+        $stats['in_transit_shipments'] = $this->pengirimanModel->where('status', 2)->countAllResults(); // In Transit
 
         // Time-based statistics
         $stats['today_shipments'] = $this->pengirimanModel->where('DATE(tanggal)', date('Y-m-d'))->countAllResults();
@@ -75,7 +91,7 @@ class DashboardController extends BaseController
 
         // Additional statistics based on user level
         switch ($userLevel) {
-            case USER_LEVEL_ADMIN:
+            case USER_LEVEL_ADMIN: // Admin
                 // Admin can see all statistics
                 $stats['total_items'] = $this->barangModel->countAll();
                 $stats['total_customers'] = $this->pelangganModel->countAll();
@@ -89,18 +105,20 @@ class DashboardController extends BaseController
                 $stats['monthly_trends'] = $this->getMonthlyTrends();
                 break;
 
-            case USER_LEVEL_FINANCE:
+            case USER_LEVEL_FINANCE: // Finance
                 // Finance can see customer and shipment statistics
                 $stats['total_customers'] = $this->pelangganModel->countAll();
                 $stats['delivery_rate'] = $stats['total_shipments'] > 0 ? 
                     round(($stats['delivered_shipments'] / $stats['total_shipments']) * 100, 1) : 0;
                 break;
 
-            case USER_LEVEL_GUDANG:
-                // Gudang can see item and shipment statistics
+            case USER_LEVEL_GUDANG: // Gudang
+                // Gudang can see item and shipment statistics but NOT customers
                 $stats['total_items'] = $this->barangModel->countAll();
                 $stats['pending_rate'] = $stats['total_shipments'] > 0 ? 
                     round(($stats['pending_shipments'] / $stats['total_shipments']) * 100, 1) : 0;
+                // Explicitly set customers to 0 or hide it
+                $stats['total_customers'] = 0; // This will be used to hide the card
                 break;
         }
 
@@ -124,7 +142,7 @@ class DashboardController extends BaseController
                 
             $delivered = $this->pengirimanModel
                 ->where("DATE_FORMAT(tanggal, '%Y-%m')", $date)
-                ->where('status', SHIPMENT_STATUS_DELIVERED)
+                ->where('status', SHIPMENT_STATUS_DELIVERED) // Delivered
                 ->countAllResults();
             
             $trends[] = [
@@ -155,16 +173,16 @@ class DashboardController extends BaseController
 
         foreach ($recentShipments as $shipment) {
             $statusText = match($shipment['status']) {
-                SHIPMENT_STATUS_PENDING => 'created',
-                SHIPMENT_STATUS_IN_TRANSIT => 'updated to in transit',
-                SHIPMENT_STATUS_DELIVERED => 'delivered',
+                1 => 'created', // Pending
+                2 => 'updated to in transit', // In Transit
+                3 => 'delivered', // Delivered
                 default => 'updated'
             };
             
             $statusType = match($shipment['status']) {
-                SHIPMENT_STATUS_PENDING => 'warning',
-                SHIPMENT_STATUS_IN_TRANSIT => 'info',
-                SHIPMENT_STATUS_DELIVERED => 'success',
+                1 => 'warning', // Pending
+                2 => 'info', // In Transit
+                3 => 'success', // Delivered
                 default => 'secondary'
             };
 
@@ -188,7 +206,7 @@ class DashboardController extends BaseController
         $actions = [];
 
         switch ($userLevel) {
-            case USER_LEVEL_ADMIN:
+            case 1: // Admin
                 $actions[] = [
                     'title' => 'System Settings',
                     'url' => base_url('/settings'),
@@ -197,7 +215,7 @@ class DashboardController extends BaseController
                 ];
                 break;
 
-            case USER_LEVEL_FINANCE:
+            case 2: // Finance
                 $actions[] = [
                     'title' => 'Generate Report',
                     'url' => base_url('/laporan'),
@@ -206,7 +224,7 @@ class DashboardController extends BaseController
                 ];
                 break;
 
-            case USER_LEVEL_GUDANG:
+            case 3: // Gudang
                 $actions[] = [
                     'title' => 'New Shipment',
                     'url' => base_url('/pengiriman/create'),
@@ -240,5 +258,39 @@ class DashboardController extends BaseController
         } else {
             return date('M j, Y', strtotime($datetime));
         }
+    }
+
+    /**
+     * Get status distribution for dashboard charts
+     */
+    private function getStatusDistribution(): array
+    {
+        $distribution = [];
+        
+        $distribution[] = [
+            'label' => 'Pending',
+            'value' => $this->pengirimanModel->where('status', 1)->countAllResults(),
+            'color' => '#ffc107'
+        ];
+        
+        $distribution[] = [
+            'label' => 'In Transit',
+            'value' => $this->pengirimanModel->where('status', 2)->countAllResults(),
+            'color' => '#17a2b8'
+        ];
+        
+        $distribution[] = [
+            'label' => 'Delivered',
+            'value' => $this->pengirimanModel->where('status', 3)->countAllResults(),
+            'color' => '#28a745'
+        ];
+        
+        $distribution[] = [
+            'label' => 'Cancelled',
+            'value' => $this->pengirimanModel->where('status', 4)->countAllResults(),
+            'color' => '#dc3545'
+        ];
+        
+        return $distribution;
     }
 }

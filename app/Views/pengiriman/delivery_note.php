@@ -285,32 +285,27 @@
             </tr>
         </thead>
         <tbody>
-            <?php if (!empty($detail_pengiriman)): ?>
+            <?php if (!empty($details)): ?>
                 <?php 
-                $totalNilai = 0;
                 $totalItem = 0;
-                foreach ($detail_pengiriman as $index => $detail): 
-                    $subtotal = $detail->jumlah * $detail->harga;
-                    $totalNilai += $subtotal;
-                    $totalItem += $detail->jumlah;
+                foreach ($details as $index => $detail): 
+                    $totalItem += $detail->qty;
                 ?>
                 <tr>
                     <td class="text-center"><?= $index + 1 ?></td>
-                    <td><?= esc($detail->nama_barang) ?></td>
-                    <td><?= esc($detail->nama_kategori) ?></td>
-                    <td class="text-center"><?= number_format($detail->jumlah) ?></td>
-                    <td class="text-center"><?= esc($detail->satuan) ?></td>
-                    <td class="text-right">Rp <?= number_format($detail->harga, 0, ',', '.') ?></td>
-                    <td class="text-right">Rp <?= number_format($subtotal, 0, ',', '.') ?></td>
-                    <td><?= !empty($detail->keterangan) ? esc($detail->keterangan) : '-' ?></td>
+                    <td><?= esc($detail->nama_barang ?? 'N/A') ?></td>
+                    <td><?= esc($detail->nama_kategori ?? 'N/A') ?></td>
+                    <td class="text-center"><?= number_format($detail->qty) ?></td>
+                    <td class="text-center"><?= esc($detail->satuan ?? 'Unit') ?></td>
+                    <td class="text-right">-</td>
+                    <td class="text-right">-</td>
+                    <td><?= esc($detail->keterangan ?? $pengiriman->keterangan ?? '-') ?></td>
                 </tr>
                 <?php endforeach; ?>
                 <tr class="total-row">
                     <td colspan="3" class="text-center"><strong>TOTAL</strong></td>
                     <td class="text-center"><strong><?= number_format($totalItem) ?></strong></td>
-                    <td colspan="2" class="text-center"><strong>TOTAL NILAI:</strong></td>
-                    <td class="text-right"><strong>Rp <?= number_format($totalNilai, 0, ',', '.') ?></strong></td>
-                    <td></td>
+                    <td colspan="4" class="text-center"><strong>TOTAL ITEMS: <?= count($details) ?></strong></td>
                 </tr>
             <?php else: ?>
                 <tr>

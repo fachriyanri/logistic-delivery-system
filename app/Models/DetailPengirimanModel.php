@@ -49,7 +49,7 @@ class DetailPengirimanModel extends Model
     public function getByShipmentId(string $shipmentId): array
     {
         $builder = $this->db->table($this->table . ' dp');
-        $builder->select("dp.*, b.nama as nama_barang, b.satuan, k.nama as nama_kategori, dp.qty as jumlah, b.harga as harga, '' as keterangan");
+        $builder->select("dp.*, b.nama as nama_barang, b.satuan, k.nama as nama_kategori, dp.qty as jumlah, '' as keterangan");
         $builder->join('barang b', 'b.id_barang = dp.id_barang', 'left');
         $builder->join('kategori k', 'k.id_kategori = b.id_kategori', 'left');
         $builder->where('dp.id_pengiriman', $shipmentId);

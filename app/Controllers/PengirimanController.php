@@ -27,11 +27,16 @@ class PengirimanController extends BaseController
         $tanggal_sampai = trim($this->request->getGet('tanggal_sampai') ?? '');
 
         $filter = [
-            'search' => $search,
+            'keyword' => $search,
             'status' => $status,
-            'tanggal_dari' => $tanggal_dari,
-            'tanggal_sampai' => $tanggal_sampai
+            'from' => $tanggal_dari,
+            'to' => $tanggal_sampai
         ];
+
+        // Remove empty filters to prevent showing data when search should return no results
+        $filter = array_filter($filter, function($value) {
+            return $value !== '' && $value !== null;
+        });
 
         $page = (int) ($this->request->getGet('page') ?? 1);
         $perPage = 15;
@@ -70,10 +75,10 @@ class PengirimanController extends BaseController
             'title' => $id ? 'Edit Pengiriman' : 'Tambah Pengiriman',
             'isEdit' => !empty($id),
             'pengiriman' => null,
-            'details' => [],
-            'customers' => $this->pengirimanService->getCustomersForSelect(),
-            'couriers' => $this->pengirimanService->getCouriersForSelect(),
-            'items' => $this->pengirimanService->getItemsForSelect(),
+            'detail_pengiriman' => [],
+            'pelanggan' => $this->pengirimanService->getCustomersForSelect(),
+            'kurir' => $this->pengirimanService->getCouriersForSelect(),
+            'barang' => $this->pengirimanService->getItemsForSelect(),
             'statusOptions' => $this->pengirimanService->getStatusOptions(),
             'autocode' => $this->pengirimanService->generateNextId()
         ];
@@ -85,7 +90,7 @@ class PengirimanController extends BaseController
                 return redirect()->to('/pengiriman');
             }
             $data['pengiriman'] = $pengiriman;
-            $data['details'] = $this->pengirimanService->getShipmentDetails($id);
+            $data['detail_pengiriman'] = $this->pengirimanService->getShipmentDetails($id);
         }
 
         return view('pengiriman/manage', $data);
@@ -120,12 +125,13 @@ class PengirimanController extends BaseController
 
         // Prepare details data
         $details = [];
-        if (!empty($post['detail']['id_barang']) && is_array($post['detail']['id_barang'])) {
-            foreach ($post['detail']['id_barang'] as $index => $itemId) {
-                if (!empty($itemId) && !empty($post['detail']['qty'][$index])) {
+        if (!empty($post['items']) && is_array($post['items'])) {
+            foreach ($post['items'] as $item) {
+                if (!empty($item['id_barang']) && !empty($item['jumlah'])) {
                     $details[] = [
-                        'id_barang' => $itemId,
-                        'qty' => (int) $post['detail']['qty'][$index]
+                        'id_barang' => $item['id_barang'],
+                        'qty' => (int) $item['jumlah'],
+                        'keterangan' => $item['keterangan'] ?? ''
                     ];
                 }
             }
@@ -544,15 +550,48 @@ class PengirimanController extends BaseController
             return redirect()->to('/pengiriman');
         }
 
-        $pengiriman = $this->pengirimanService->getShipmentWithDetails($id);
+        $pengiriman = $this->pengirimanService->getShipmentById($id);
         if (!$pengiriman) {
             session()->setFlashdata('error', 'Pengiriman tidak ditemukan');
             return redirect()->to('/pengiriman');
         }
 
+        $details = $this->pengirimanService->getShipmentDetails($id);
+
+        // Convert to format expected by mobile view
+        $statusMap = [
+            1 => 'Pending',
+            2 => 'In Transit',
+            3 => 'Delivered',
+            4 => 'Cancelled'
+        ];
+
+        $items = [];
+        foreach ($details as $detail) {
+            $items[] = [
+                'name' => $detail->nama_barang ?? 'N/A',
+                'quantity' => $detail->qty,
+                'unit' => $detail->satuan ?? 'Unit',
+                'notes' => $detail->keterangan ?? ''
+            ];
+        }
+
+        $shipment = [
+            'shipment_id' => $pengiriman->id_pengiriman,
+            'status' => $statusMap[$pengiriman->status] ?? 'Unknown',
+            'date' => $pengiriman->tanggal,
+            'customer' => $pengiriman->nama_pelanggan ?? 'N/A',
+            'courier' => $pengiriman->nama_kurir ?? 'N/A',
+            'vehicle' => $pengiriman->no_kendaraan ?? '',
+            'po_number' => $pengiriman->no_po ?? '',
+            'recipient' => $pengiriman->penerima ?? '',
+            'notes' => $pengiriman->keterangan ?? '',
+            'items' => $items
+        ];
+
         $data = [
             'title' => 'Tracking Pengiriman - ' . $pengiriman->id_pengiriman,
-            'pengiriman' => $pengiriman
+            'shipment' => $shipment
         ];
 
         return view('mobile/track_shipment', $data);

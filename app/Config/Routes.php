@@ -24,6 +24,17 @@ $routes->get('/login', 'AuthController::index');
 $routes->post('/login', 'AuthController::authenticate');
 $routes->get('/logout', 'AuthController::logout');
 
+// Profile and Password Routes (Protected)
+$routes->group('', ['filter' => 'auth'], static function ($routes) {
+    $routes->get('profile', 'ProfileController::index');
+    $routes->post('profile', 'ProfileController::update');
+    $routes->get('change-password', 'PasswordController::index');
+    $routes->post('change-password', 'PasswordController::update');
+    $routes->get('settings', 'SettingsController::index');
+    $routes->post('settings', 'SettingsController::update');
+    $routes->get('laporan', 'LaporanController::index');
+});
+
 // Dashboard Routes (Protected)
 $routes->group('dashboard', ['filter' => 'auth'], static function ($routes) {
     $routes->get('/', 'DashboardController::index');

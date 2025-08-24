@@ -62,7 +62,7 @@
                         <i class="fas fa-user-circle fa-lg"></i>
                     </div>
                     <div class="user-info d-none d-xl-block">
-                        <div class="user-name"><?= session('userData')['username'] ?? '' ?></div>
+                        <div class="user-name"><?= session('username') ?? '' ?></div>
                     </div>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end user-dropdown" aria-labelledby="userDropdown">
@@ -70,7 +70,7 @@
                         <div class="d-flex align-items-center">
                             <i class="fas fa-user-circle fa-2x me-3"></i>
                             <div>
-                                <div class="fw-bold"><?= session('userData')['username'] ?? '' ?></div>
+                                <div class="fw-bold"><?= session('username') ?? '' ?></div>
                             </div>
                         </div>
                     </li>

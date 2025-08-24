@@ -80,7 +80,6 @@
                                     </th>
                                     <th>Telepon</th>
                                     <th>Alamat</th>
-                                    <th>Tipe</th>
                                     <th width="150">Aksi</th>
                                 </tr>
                             </thead>
@@ -90,13 +89,8 @@
                                     <tr>
                                         <td><?= esc($pelanggan->id_pelanggan) ?></td>
                                         <td><?= esc($pelanggan->nama) ?></td>
-                                        <td><?= esc($pelanggan->getFormattedPhone()) ?></td>
-                                        <td><?= esc($pelanggan->getShortAddress(40)) ?></td>
-                                        <td>
-                                            <span class="badge bg-<?= $pelanggan->getCustomerType() === 'Corporate' ? 'primary' : 'secondary' ?>">
-                                                <?= esc($pelanggan->getCustomerType()) ?>
-                                            </span>
-                                        </td>
+                                        <td><?= esc($pelanggan->telepon) ?></td>
+                                        <td><?= esc($pelanggan->alamat) ?></td>
                                         <td>
                                             <div class="btn-group" role="group">
                                                 <a href="<?= base_url('pelanggan/manage/' . $pelanggan->id_pelanggan) ?>" 
@@ -115,7 +109,7 @@
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="6" class="text-center">Tidak ada data pelanggan</td>
+                                        <td colspan="5" class="text-center">Tidak ada data pelanggan</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>

@@ -22,8 +22,8 @@ class PelangganModel extends Model
     protected $useTimestamps = false;
 
     protected $validationRules = [
-        'id_pelanggan' => 'required|max_length[7]|is_unique[pelanggan.id_pelanggan,id_pelanggan,{id_pelanggan}]',
-        'nama' => 'required|max_length[30]|is_unique[pelanggan.nama,id_pelanggan,{id_pelanggan}]',
+        'id_pelanggan' => 'required|max_length[7]',
+        'nama' => 'required|max_length[30]',
         'telepon' => 'required|max_length[15]',
         'alamat' => 'required|max_length[150]'
     ];
@@ -31,13 +31,11 @@ class PelangganModel extends Model
     protected $validationMessages = [
         'id_pelanggan' => [
             'required' => 'ID Pelanggan harus diisi',
-            'max_length' => 'ID Pelanggan maksimal 7 karakter',
-            'is_unique' => 'ID Pelanggan sudah terdaftar'
+            'max_length' => 'ID Pelanggan maksimal 7 karakter'
         ],
         'nama' => [
             'required' => 'Nama pelanggan harus diisi',
-            'max_length' => 'Nama pelanggan maksimal 30 karakter',
-            'is_unique' => 'Nama pelanggan sudah terdaftar'
+            'max_length' => 'Nama pelanggan maksimal 30 karakter'
         ],
         'telepon' => [
             'required' => 'Nomor telepon harus diisi',

@@ -142,7 +142,7 @@ class KurirModel extends Model
     {
         // Hash password if provided
         if (!empty($data['password'])) {
-            $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+            $data['password'] = password_hash($data['password'], PASSWORD_ARGON2ID);
         }
 
         if (empty($id)) {
@@ -220,10 +220,25 @@ class KurirModel extends Model
 
     /**
      * Update courier password
+     * 
+     * Updates courier password with secure hashing using Argon2ID algorithm.
+     * Automatically hashes the password before storing in database.
+     * 
+     * @param string $courierId   The courier ID to update
+     * @param string $newPassword The new plain text password
+     * 
+     * @return bool True if update successful, false otherwise
+     * 
+     * @example
+     * // Update courier password
+     * $success = $kurirModel->updatePassword('KRR01', 'NewSecurePassword123');
+     * 
+     * @see password_hash() For secure password hashing
+     * @see PASSWORD_ARGON2ID Hashing algorithm constant
      */
     public function updatePassword(string $courierId, string $newPassword): bool
     {
-        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        $hashedPassword = password_hash($newPassword, PASSWORD_ARGON2ID);
         
         return $this->update($courierId, ['password' => $hashedPassword]);
     }

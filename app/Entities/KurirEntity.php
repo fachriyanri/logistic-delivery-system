@@ -78,7 +78,7 @@ class KurirEntity extends Entity
      */
     public function setPassword(string $password): self
     {
-        $this->attributes['password'] = password_hash($password, PASSWORD_DEFAULT);
+        $this->attributes['password'] = password_hash($password, PASSWORD_ARGON2ID);
         return $this;
     }
 

@@ -72,7 +72,7 @@
                                         <?php foreach ($pelanggan as $p): ?>
                                             <option value="<?= $p->id_pelanggan ?>" 
                                                     <?= old('id_pelanggan', $pengiriman->id_pelanggan ?? '') == $p->id_pelanggan ? 'selected' : '' ?>>
-                                                <?= esc($p->nama_pelanggan) ?> - <?= esc($p->alamat) ?>
+                                                <?= esc($p->nama) ?> - <?= esc($p->alamat) ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
@@ -90,7 +90,7 @@
                                         <?php foreach ($kurir as $k): ?>
                                             <option value="<?= $k->id_kurir ?>" 
                                                     <?= old('id_kurir', $pengiriman->id_kurir ?? '') == $k->id_kurir ? 'selected' : '' ?>>
-                                                <?= esc($k->nama_kurir) ?> - <?= esc($k->telepon) ?>
+                                                <?= esc($k->nama) ?> - <?= esc($k->telepon) ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
@@ -214,7 +214,7 @@
                                             <?php foreach ($barang as $b): ?>
                                                 <option value="<?= $b->id_barang ?>" 
                                                         <?= $detail->id_barang == $b->id_barang ? 'selected' : '' ?>>
-                                                    <?= esc($b->nama_barang) ?> (<?= esc($b->satuan) ?>)
+                                                    <?= esc($b->nama) ?> (<?= esc($b->satuan) ?>)
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>

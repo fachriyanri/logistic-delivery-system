@@ -350,7 +350,7 @@ class PengirimanService
      */
     public function getCustomersForSelect(): array
     {
-        return $this->pelangganModel->getCustomersForSelect();
+        return $this->pelangganModel->orderBy('nama', 'ASC')->findAll();
     }
 
     /**
@@ -358,7 +358,7 @@ class PengirimanService
      */
     public function getCouriersForSelect(): array
     {
-        return $this->kurirModel->getCouriersForSelect();
+        return $this->kurirModel->orderBy('nama', 'ASC')->findAll();
     }
 
     /**
@@ -366,7 +366,7 @@ class PengirimanService
      */
     public function getItemsForSelect(): array
     {
-        return $this->barangModel->getItemsForSelect();
+        return $this->barangModel->orderBy('nama', 'ASC')->findAll();
     }
 
     /**

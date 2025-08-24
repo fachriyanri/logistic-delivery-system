@@ -149,6 +149,7 @@
             ]) ?>
         </div>
 
+        <?php if (session('level') != 3): // Hide customers for gudang role ?>
         <div class="col-xl-3 col-md-6 mb-3">
             <?= component('analytics_card', [
                 'title' => 'Customers',
@@ -165,6 +166,7 @@
                 'url' => base_url('/pelanggan')
             ]) ?>
         </div>
+        <?php endif; ?>
     </div>
 
     <!-- Quick Actions -->

@@ -101,19 +101,6 @@
                                               required><?= old('alamat', $pelanggan->alamat ?? '') ?></textarea>
                                     <div class="form-text">Maksimal 150 karakter</div>
                                 </div>
-
-                                <!-- Customer Type Preview -->
-                                <?php if ($isEdit): ?>
-                                <div class="mb-3">
-                                    <label class="form-label">Tipe Pelanggan</label>
-                                    <div>
-                                        <span class="badge bg-<?= $pelanggan->getCustomerType() === 'Corporate' ? 'primary' : 'secondary' ?> fs-6">
-                                            <?= esc($pelanggan->getCustomerType()) ?>
-                                        </span>
-                                    </div>
-                                    <div class="form-text">Tipe ditentukan otomatis berdasarkan nama pelanggan</div>
-                                </div>
-                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

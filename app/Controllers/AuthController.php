@@ -140,11 +140,9 @@ class AuthController extends BaseController
             // Set session data
             $sessionData = [
                 'isLoggedIn' => true,
-                'userData' => [
-                    'id_user' => $user->id_user,
-                    'username' => $user->username,
-                    'level' => $user->level
-                ]
+                'id_user' => $user->id_user,
+                'username' => $user->username,
+                'level' => $user->level
             ];
 
             $this->session->set($sessionData);
@@ -173,10 +171,10 @@ class AuthController extends BaseController
         ]);
 
         if ($this->request->isAJAX()) {
-            return $this->jsonError('Invalid username or password');
+            return $this->jsonError('Invalid Username And Password');
         }
 
-        return redirect()->back()->withInput()->with('error', 'Invalid username or password');
+        return redirect()->back()->withInput()->with('error', 'Invalid Username And Password');
     }
 
     /**
@@ -203,8 +201,8 @@ class AuthController extends BaseController
         // Log logout activity
         if ($this->isAuthenticated()) {
             $this->logActivity('logout', [
-                'user_id' => $this->currentUser['id_user'],
-                'username' => $this->currentUser['username']
+                'user_id'  => session()->get('id_user'),
+                'username' => session()->get('username')
             ]);
         }
 
