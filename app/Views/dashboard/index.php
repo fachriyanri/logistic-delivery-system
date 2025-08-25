@@ -197,7 +197,7 @@
 
                         <?php if (session('level') == 1 || session('level') == 2): ?>
                         <div class="col-lg-3 col-md-6 mb-3">
-                            <div class="card quick-action-card h-100" onclick="window.location.href='<?= base_url('/pelanggan/create') ?>'">
+                            <div class="card quick-action-card h-100" onclick="window.location.href='<?= base_url('/barang/manage') ?>'">
                                 <div class="card-body text-center">
                                     <div class="mb-3">
                                         <i class="fas fa-user-plus fa-2x text-success"></i>

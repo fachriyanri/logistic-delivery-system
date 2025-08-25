@@ -11,12 +11,14 @@ class UserEntity extends Entity
         'username' => null,
         'password' => null,
         'level' => null,
+        'is_active' => null,
         'created_at' => null,
         'updated_at' => null,
     ];
 
     protected $casts = [
         'level' => 'integer',
+        'is_active' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -54,6 +56,30 @@ class UserEntity extends Entity
     public function isAdmin(): bool
     {
         return $this->attributes['level'] === USER_LEVEL_ADMIN;
+    }
+
+    /**
+     * Check if user is active
+     */
+    public function isActive(): bool
+    {
+        return (bool) ($this->attributes['is_active'] ?? false);
+    }
+
+    /**
+     * Get user status display
+     */
+    public function getStatusDisplay(): string
+    {
+        return $this->isActive() ? 'Active' : 'Inactive';
+    }
+
+    /**
+     * Get status badge class for display
+     */
+    public function getStatusBadgeClass(): string
+    {
+        return $this->isActive() ? 'badge bg-success' : 'badge bg-danger';
     }
 
     /**

@@ -137,6 +137,24 @@ class AuthController extends BaseController
         $user = $this->userModel->where('username', $username)->first();
 
         if ($user && password_verify($password, $user->password)) {
+            // Check if user is active
+            if (!$user->isActive()) {
+                // Log inactive user login attempt
+                $this->logActivity('login_failed_inactive', [
+                    'username' => $username,
+                    'ip_address' => $this->request->getIPAddress(),
+                    'reason' => 'User account is inactive'
+                ]);
+
+                $errorMessage = 'Your username is not active please contact administrator';
+                
+                if ($this->request->isAJAX()) {
+                    return $this->jsonError($errorMessage);
+                }
+
+                return redirect()->back()->withInput()->with('error', $errorMessage);
+            }
+
             // Set session data
             $sessionData = [
                 'isLoggedIn' => true,

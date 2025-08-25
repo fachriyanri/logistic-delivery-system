@@ -34,7 +34,8 @@ class UserModel extends Model
         'id_user',
         'username',
         'password',
-        'level'
+        'level',
+        'is_active'
     ];
 
     protected $useTimestamps = true;
@@ -71,6 +72,12 @@ class UserModel extends Model
             'errors' => [
                 'required' => 'User level is required',
                 'in_list' => 'Invalid user level'
+            ]
+        ],
+        'is_active' => [
+            'rules' => 'permit_empty|in_list[0,1]',
+            'errors' => [
+                'in_list' => 'Invalid active status'
             ]
         ]
     ];
@@ -189,5 +196,51 @@ class UserModel extends Model
         ];
 
         return $levels[$level] ?? 'Unknown';
+    }
+
+    /**
+     * Get all users excluding admin (level 1) for user management
+     */
+    public function getNonAdminUsers(): array
+    {
+        return $this->where('level !=', USER_LEVEL_ADMIN)
+                   ->orderBy('username', 'ASC')
+                   ->findAll();
+    }
+
+    /**
+     * Toggle user active status
+     */
+    public function toggleActiveStatus(string $userId): bool
+    {
+        $user = $this->find($userId);
+        if (!$user) {
+            return false;
+        }
+
+        $newStatus = $user->is_active ? 0 : 1;
+        return $this->update($userId, ['is_active' => $newStatus]);
+    }
+
+    /**
+     * Update user active status
+     */
+    public function updateActiveStatus(string $userId, bool $isActive): bool
+    {
+        return $this->update($userId, ['is_active' => $isActive ? 1 : 0]);
+    }
+
+    /**
+     * Check if user can be deleted (not admin and not in use)
+     */
+    public function canBeDeleted(string $userId): bool
+    {
+        $user = $this->find($userId);
+        if (!$user || $user->level === USER_LEVEL_ADMIN) {
+            return false;
+        }
+
+        // Add additional checks here if needed (e.g., user has no related records)
+        return true;
     }
 }

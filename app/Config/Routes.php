@@ -101,13 +101,20 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->get('pelanggan/get-by-type', 'PelangganController::getByType');
     $routes->post('pelanggan/validate-phone', 'PelangganController::validatePhone');
 
-    // User Routes (Admin only)
+    // User Routes (Admin only) - Legacy RESTful routes
     $routes->get('user', 'UserController::index', ['filter' => 'role:1']);
     $routes->get('user/create', 'UserController::create', ['filter' => 'role:1']);
     $routes->post('user', 'UserController::store', ['filter' => 'role:1']);
     $routes->get('user/(:segment)/edit', 'UserController::edit/$1', ['filter' => 'role:1']);
     $routes->put('user/(:segment)', 'UserController::update/$1', ['filter' => 'role:1']);
     $routes->delete('user/(:segment)', 'UserController::delete/$1', ['filter' => 'role:1']);
+
+    // User Management Routes (Admin only) - New user management system
+    $routes->get('users', 'UserController::index');
+    $routes->get('users/edit/(:segment)', 'UserController::edit/$1');
+    $routes->post('users/update', 'UserController::update');
+    $routes->get('users/delete/(:segment)', 'UserController::delete/$1');
+    $routes->post('users/toggle-status', 'UserController::toggleStatus');
 });
 
 // Transaction Routes (Protected)
