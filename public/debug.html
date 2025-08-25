@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Table Debug</title>
+    <style>
+        body { font-family: monospace; margin: 20px; }
+        pre { background: #f5f5f5; padding: 10px; border: 1px solid #ddd; }
+        button { padding: 10px 20px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>User Table Debug Test</h1>
+    <button onclick="testUserTable()">Test User Table</button>
+    <pre id="output">Click the button to run the test...</pre>
+
+    <script>
+        function testUserTable() {
+            const output = document.getElementById('output');
+            output.textContent = 'Running test...';
+            
+            // Since we can't run PHP directly, let's try to make a request to our debug controller
+            fetch('/PuninarLogistic/public/index.php/debug/user-table')
+                .then(response => response.text())
+                .then(data => {
+                    output.textContent = data;
+                })
+                .catch(error => {
+                    output.textContent = 'Error: ' + error.message + '\n\nTrying alternative approach...';
+                    
+                    // Alternative: try to access a simple PHP info
+                    testPHPConnection();
+                });
+        }
+        
+        function testPHPConnection() {
+            const output = document.getElementById('output');
+            
+            // Let's try to create a simple test by making a request to the kurir controller
+            // with some debug parameters
+            fetch('/PuninarLogistic/public/index.php/kurir', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.text())
+            .then(data => {
+                output.textContent = 'Response from kurir endpoint:\n' + data;
+            })
+            .catch(error => {
+                output.textContent = 'All requests failed. Error: ' + error.message;
+            });
+        }
+    </script>
+</body>
+</html>

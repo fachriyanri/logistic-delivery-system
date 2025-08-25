@@ -104,6 +104,7 @@ class KurirController extends BaseController
             'jenis_kelamin' => $post['jenis_kelamin'] ?? '',
             'telepon' => $post['telepon'] ?? '',
             'alamat' => $post['alamat'] ?? '',
+            'username' => $post['username'] ?? '',
             'password' => $post['password'] ?? ''
         ];
 
@@ -126,13 +127,7 @@ class KurirController extends BaseController
 
         if ($result['success']) {
             session()->setFlashdata('success', $result['message']);
-            
-            if ($action === 'save') {
-                $redirectId = $result['data']->id_kurir ?? $id;
-                return redirect()->to('/kurir/manage/' . $redirectId);
-            } else {
-                return redirect()->to('/kurir');
-            }
+            return redirect()->to('/kurir');
         } else {
             session()->setFlashdata('error', $result['message']);
             return redirect()->to('/kurir/manage/' . $id)->withInput();
@@ -235,33 +230,7 @@ class KurirController extends BaseController
         ]);
     }
 
-    /**
-     * Update courier password
-     */
-    public function updatePassword(): ResponseInterface
-    {
-        $id = $this->request->getPost('id_kurir');
-        $newPassword = $this->request->getPost('new_password');
-        $confirmPassword = $this->request->getPost('confirm_password');
-        
-        if (empty($id) || empty($newPassword) || empty($confirmPassword)) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Semua field harus diisi'
-            ]);
-        }
 
-        if ($newPassword !== $confirmPassword) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Konfirmasi password tidak cocok'
-            ]);
-        }
-
-        $result = $this->kurirService->updatePassword($id, $newPassword);
-        
-        return $this->response->setJSON($result);
-    }
 
     /**
      * Show courier statistics

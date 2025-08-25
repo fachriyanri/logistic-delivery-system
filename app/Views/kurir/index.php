@@ -95,6 +95,7 @@
                                     </th>
                                     <th>Jenis Kelamin</th>
                                     <th>Telepon</th>
+                                    <th>Username</th>
                                     <th>Alamat</th>
                                     <th width="150">Aksi</th>
                                 </tr>
@@ -111,6 +112,7 @@
                                             </span>
                                         </td>
                                         <td><?= esc($kurir->getFormattedPhone()) ?></td>
+                                        <td>-</td> <!-- Username will be shown from user table if needed -->
                                         <td><?= esc($kurir->alamat ?: '-') ?></td>
                                         <td>
                                             <div class="btn-group" role="group">
@@ -130,7 +132,7 @@
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="6" class="text-center">Tidak ada data kurir</td>
+                                        <td colspan="7" class="text-center">Tidak ada data kurir</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>

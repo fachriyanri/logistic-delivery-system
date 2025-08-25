@@ -2,242 +2,158 @@
 
 namespace App\Controllers;
 
-use App\Controllers\BaseController;
-use App\Services\KategoriService;
+use App\Models\UserModel;
+use CodeIgniter\Controller;
 
-class DebugController extends BaseController
+class DebugController extends Controller
 {
-    public function testKategori()
+    public function userTable()
     {
-        $kategoriService = new KategoriService();
+        // Set content type to plain text for better readability
+        $this->response->setContentType('text/plain');
         
-        echo "<h1>Category System Debug</h1>";
-        
-        // Cleanup any previous test records
-        echo "<h2>Cleanup Previous Test Records</h2>";
-        $db = \Config\Database::connect();
-        $cleanupResult = $db->query("DELETE FROM kategori WHERE nama LIKE 'Test%'");
-        echo "Cleaned up test records<br>";
-        
-        // Test 1: Get all categories
-        echo "<h2>Test 1: Get All Categories</h2>";
-        [$categories, $total] = $kategoriService->getAllCategories();
-        echo "Total categories: " . $total . "<br>";
-        foreach ($categories as $cat) {
-            echo "- {$cat->id_kategori}: {$cat->nama}<br>";
-        }
-        
-        // Test 2: Generate next ID
-        echo "<h2>Test 2: Generate Next ID</h2>";
-        $nextId = $kategoriService->generateNextId();
-        echo "Next ID: " . $nextId . "<br>";
-        
-        // Test 3: Test validation
-        echo "<h2>Test 3: Test Validation</h2>";
-        $testData = [
-            'id_kategori' => $nextId,
-            'nama' => 'Test Category',
-            'keterangan' => 'Test description'
-        ];
-        $errors = $kategoriService->validateCategoryData($testData);
-        if (empty($errors)) {
-            echo "Validation passed<br>";
-        } else {
-            echo "Validation errors:<br>";
-            foreach ($errors as $error) {
-                echo "- " . $error . "<br>";
-            }
-        }
-        
-        // Test 4: Test category creation
-        echo "<h2>Test 4: Test Category Creation</h2>";
-        
-        // Find a unique test ID
-        $kategoriModel = new \App\Models\KategoriModel();
-        $testId = 'KTG99';
-        $counter = 99;
-        
-        while ($kategoriModel->find($testId) && $counter > 90) {
-            $counter--;
-            $testId = 'KTG' . str_pad($counter, 2, '0', STR_PAD_LEFT);
-        }
-        
-        $testData['id_kategori'] = $testId;
-        $testData['nama'] = 'Test Category ' . $counter;
-        
-        echo "Using unique test data: " . json_encode($testData) . "<br>";
-        
-        // Test direct model insert first
-        echo "<h3>4a: Direct Model Test</h3>";
-        
-        $insertResult = $kategoriModel->insert($testData);
-        if ($insertResult) {
-            echo "Direct model insert successful: " . $insertResult . "<br>";
-            
-            // Clean up
-            $kategoriModel->delete($testData['id_kategori']);
-        } else {
-            echo "Direct model insert failed<br>";
-            $errors = $kategoriModel->errors();
-            if (!empty($errors)) {
-                echo "Model errors: " . json_encode($errors) . "<br>";
-            }
-            
-            // Get validation errors
-            $validation = \Config\Services::validation();
-            $validationErrors = $validation->getErrors();
-            if (!empty($validationErrors)) {
-                echo "Validation errors: " . json_encode($validationErrors) . "<br>";
-            }
-            
-            // Check if validation was run
-            echo "Model validation rules: " . json_encode($kategoriModel->getValidationRules()) . "<br>";
-            
-            // Try without validation
-            echo "<h4>Testing without validation:</h4>";
-            $kategoriModel->skipValidation(true);
-            
-            // Make sure we use a unique ID for this test too
-            $testData2 = $testData;
-            $testData2['id_kategori'] = 'KTG' . str_pad($counter - 1, 2, '0', STR_PAD_LEFT);
-            $testData2['nama'] = 'Test No Validation ' . ($counter - 1);
-            
-            $insertResult2 = $kategoriModel->insert($testData2);
-            if ($insertResult2) {
-                echo "Insert without validation: SUCCESS<br>";
-                $kategoriModel->delete($testData2['id_kategori']);
-            } else {
-                echo "Insert without validation: FAILED<br>";
-                echo "Last query: " . $kategoriModel->db->getLastQuery() . "<br>";
-            }
-            
-            // Check database connection
-            $db = \Config\Database::connect();
-            if ($db->connID) {
-                echo "Database connection: OK<br>";
-            } else {
-                echo "Database connection: FAILED<br>";
-            }
-        }
-        
-        echo "<h3>4b: Service Layer Test</h3>";
-        
-        // Debug service layer checks
-        echo "Checking if ID {$testData['id_kategori']} exists: ";
-        $existingById = $kategoriService->getCategoryById($testData['id_kategori']);
-        echo $existingById ? "YES (found)" : "NO (not found)";
-        echo "<br>";
-        
-        echo "Checking if name '{$testData['nama']}' exists: ";
-        $existingByName = $kategoriService->getCategoryByName($testData['nama']);
-        echo $existingByName ? "YES (found)" : "NO (not found)";
-        echo "<br>";
-        
-        $result = $kategoriService->createCategory($testData);
-        if ($result['success']) {
-            echo "Category created successfully: " . $result['message'] . "<br>";
-            
-            // Test 5: Test category deletion
-            echo "<h2>Test 5: Test Category Deletion</h2>";
-            $deleteResult = $kategoriService->deleteCategory($testData['id_kategori']);
-            if ($deleteResult['success']) {
-                echo "Category deleted successfully: " . $deleteResult['message'] . "<br>";
-            } else {
-                echo "Delete failed: " . $deleteResult['message'] . "<br>";
-            }
-        } else {
-            echo "Creation failed: " . $result['message'] . "<br>";
-        }
-        
-        // Test 6: Check table structure
-        echo "<h2>Test 6: Database Table Structure</h2>";
-        $db = \Config\Database::connect();
+        $output = "=== USER TABLE DEBUG ===\n\n";
         
         try {
-            $query = $db->query("DESCRIBE kategori");
-            $fields = $query->getResultArray();
+            $db = \Config\Database::connect();
             
-            echo "Table 'kategori' structure:<br>";
-            foreach ($fields as $field) {
-                echo "- {$field['Field']}: {$field['Type']} " . 
-                     ($field['Null'] === 'YES' ? '(nullable)' : '(not null)') . 
-                     ($field['Key'] === 'PRI' ? ' PRIMARY KEY' : '') . "<br>";
+            // Check if user table exists
+            $tableExists = $db->tableExists('user');
+            $output .= "1. User table exists: " . ($tableExists ? "YES" : "NO") . "\n";
+            
+            if (!$tableExists) {
+                $output .= "ERROR: User table does not exist!\n";
+                return $this->response->setBody($output);
             }
             
-            // Test insert with raw SQL
-            echo "<h3>6a: Raw SQL Insert Test</h3>";
-            $testId = 'KTG' . str_pad($counter - 2, 2, '0', STR_PAD_LEFT);
+            // Get table structure
+            $output .= "\n2. User table structure:\n";
+            $fields = $db->getFieldData('user');
+            foreach ($fields as $field) {
+                $output .= "   - {$field->name}: {$field->type}";
+                if ($field->max_length) $output .= "({$field->max_length})";
+                if ($field->nullable) $output .= " NULL"; else $output .= " NOT NULL";
+                if ($field->default !== null) $output .= " DEFAULT '{$field->default}'";
+                $output .= "\n";
+            }
             
-            // Delete if exists
-            $db->query("DELETE FROM kategori WHERE id_kategori = ?", [$testId]);
+            // Clean up any leftover test data first
+            $db->table('user')->where('id_user LIKE', 'TS%')->delete();
             
-            $insertSQL = "INSERT INTO kategori (id_kategori, nama, keterangan, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())";
-            $insertResult = $db->query($insertSQL, [$testId, 'Test Raw SQL', 'Test description']);
+            // Test ID generation
+            $output .= "\n2.5. Testing ID generation:\n";
+            $userModel = new UserModel();
+            $generatedId = $userModel->generateNextId();
+            $output .= "   Generated ID: $generatedId\n";
             
-            if ($insertResult) {
-                echo "Raw SQL insert successful<br>";
-                
-                // Verify insert
-                $checkQuery = $db->query("SELECT * FROM kategori WHERE id_kategori = ?", [$testId]);
-                $inserted = $checkQuery->getRow();
-                if ($inserted) {
-                    echo "Verified: Record exists with ID {$inserted->id_kategori}<br>";
+            // Check if this ID exists
+            $existsCheck = $userModel->find($generatedId);
+            $output .= "   ID exists in database: " . ($existsCheck ? "YES" : "NO") . "\n";
+            
+            // Direct database check
+            $directCheck = $db->query("SELECT COUNT(*) as count FROM user WHERE id_user = ?", [$generatedId]);
+            $directExists = $directCheck->getRow()->count > 0;
+            $output .= "   Direct DB check exists: " . ($directExists ? "YES" : "NO") . "\n";
+            
+            // Check existing data
+            $output .= "\n3. Current user table data:\n";
+            $users = $db->table('user')->get()->getResultArray();
+            $output .= "   Total records: " . count($users) . "\n";
+            foreach ($users as $user) {
+                $output .= "   - ID: {$user['id_user']}, Username: {$user['username']}, Level: {$user['level']}\n";
+            }
+            
+            // Test simple insert
+            $output .= "\n4. Testing simple user insert:\n";
+            $testData = [
+                'id_user' => 'TST' . substr(time(), -2), // Keep it to 5 chars max
+                'username' => 'testuser_' . time(),
+                'password' => password_hash('testpass', PASSWORD_ARGON2ID),
+                'level' => 2,
+                'is_active' => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            
+            $output .= "   Data to insert: " . json_encode($testData, JSON_PRETTY_PRINT) . "\n";
+            
+            $builder = $db->table('user');
+            $result = $builder->insert($testData);
+            
+            $error = $db->error();
+            $lastQuery = $db->getLastQuery();
+            
+            $output .= "   Insert result: " . ($result ? "SUCCESS" : "FAILED") . "\n";
+            $output .= "   Error code: " . $error['code'] . "\n";
+            $output .= "   Error message: " . $error['message'] . "\n";
+            $output .= "   Last query: " . $lastQuery . "\n";
+            
+            if ($result) {
+                $output .= "\n5. Cleaning up test data...\n";
+                $db->table('user')->where('id_user', $testData['id_user'])->delete();
+                $output .= "   Test data cleaned up.\n";
+            }
+            
+            // Test UserModel
+            $output .= "\n6. Testing UserModel:\n";
+            $userModel = new UserModel();
+            $testData2 = [
+                'id_user' => 'TS2' . substr(time(), -2), // Keep it to 5 chars max
+                'username' => 'testuser2_' . time(),
+                'password' => password_hash('testpass', PASSWORD_ARGON2ID), // Pre-hash the password
+                'level' => 2,
+                'is_active' => 1
+            ];
+            
+            $output .= "   Testing UserModel insert...\n";
+            $output .= "   UserModel data: " . json_encode($testData2, JSON_PRETTY_PRINT) . "\n";
+            
+            // Try with validation disabled first
+            $userModel->skipValidation(true);
+            $modelResult = $userModel->insert($testData2);
+            $userModel->skipValidation(false);
+            
+            // If model insert succeeded, check the timestamps
+            if ($modelResult) {
+                $insertedUser = $userModel->find($testData2['id_user']);
+                if ($insertedUser) {
+                    $output .= "   Inserted user timestamps:\n";
+                    $output .= "   - created_at: " . ($insertedUser->created_at ?? 'NULL') . "\n";
+                    $output .= "   - updated_at: " . ($insertedUser->updated_at ?? 'NULL') . "\n";
                 }
-                
-                // Clean up
-                $db->query("DELETE FROM kategori WHERE id_kategori = ?", [$testId]);
-                echo "Cleanup completed<br>";
-            } else {
-                echo "Raw SQL insert failed<br>";
-                $error = $db->error();
-                echo "Database error: " . json_encode($error) . "<br>";
+            }
+            
+            $modelErrors = $userModel->errors();
+            
+            $output .= "   Model insert result: " . ($modelResult ? "SUCCESS" : "FAILED") . "\n";
+            if ($modelErrors) {
+                $output .= "   Model errors: " . json_encode($modelErrors, JSON_PRETTY_PRINT) . "\n";
+            }
+            
+            // Get database error from model
+            $modelDbError = $userModel->db->error();
+            if (!empty($modelDbError['message'])) {
+                $output .= "   Model DB error: " . $modelDbError['message'] . "\n";
+            }
+            
+            // Get last query from model
+            $lastModelQuery = $userModel->db->getLastQuery();
+            $output .= "   Model last query: " . $lastModelQuery . "\n";
+            
+            if ($modelResult) {
+                $output .= "   Cleaning up model test data...\n";
+                $userModel->delete($modelResult);
+                $output .= "   Model test data cleaned up.\n";
             }
             
         } catch (\Exception $e) {
-            echo "Database error: " . $e->getMessage() . "<br>";
+            $output .= "EXCEPTION: " . $e->getMessage() . "\n";
+            $output .= "File: " . $e->getFile() . " Line: " . $e->getLine() . "\n";
+            $output .= "Trace: " . $e->getTraceAsString() . "\n";
         }
         
-        echo "<br><a href='" . base_url('kategori') . "'>Back to Categories</a>";
-    }
-    
-    public function testDelete($id)
-    {
-        $kategoriService = new KategoriService();
+        $output .= "\n=== DEBUG COMPLETE ===\n";
         
-        echo "<h1>Delete Test for ID: {$id}</h1>";
-        
-        // Test 1: Check if category exists
-        echo "<h2>Test 1: Check if category exists</h2>";
-        $db = \Config\Database::connect();
-        $existingCount = $db->table('kategori')->where('id_kategori', $id)->countAllResults();
-        echo "Database count for ID {$id}: {$existingCount}<br>";
-        
-        if ($existingCount > 0) {
-            $category = $db->table('kategori')->where('id_kategori', $id)->get()->getRow();
-            echo "Found category: " . json_encode($category) . "<br>";
-        } else {
-            echo "Category not found in database<br>";
-        }
-        
-        // Test 2: Check using service
-        echo "<h2>Test 2: Check using service</h2>";
-        $serviceCategory = $kategoriService->getCategoryById($id);
-        echo "Service result: " . ($serviceCategory ? "Found" : "Not found") . "<br>";
-        
-        // Test 3: Check if in use
-        echo "<h2>Test 3: Check if category is in use</h2>";
-        $inUseCount = $db->table('barang')->where('id_kategori', $id)->countAllResults();
-        echo "Items using this category: {$inUseCount}<br>";
-        
-        // Test 4: Try delete
-        echo "<h2>Test 4: Try delete operation</h2>";
-        if ($existingCount > 0) {
-            $result = $kategoriService->deleteCategory($id);
-            echo "Delete result: " . json_encode($result) . "<br>";
-        } else {
-            echo "Skipping delete test - category doesn't exist<br>";
-        }
-        
-        echo "<br><a href='" . base_url('kategori') . "'>Back to Categories</a>";
+        return $this->response->setBody($output);
     }
 }

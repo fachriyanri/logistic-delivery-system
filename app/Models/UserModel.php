@@ -35,7 +35,9 @@ class UserModel extends Model
         'username',
         'password',
         'level',
-        'is_active'
+        'is_active',
+        'created_at',
+        'updated_at'
     ];
 
     protected $useTimestamps = true;
@@ -44,20 +46,18 @@ class UserModel extends Model
 
     protected $validationRules = [
         'id_user' => [
-            'rules' => 'required|max_length[5]|is_unique[user.id_user,id_user,{id_user}]',
+            'rules' => 'required|max_length[5]',
             'errors' => [
                 'required' => 'User ID is required',
-                'max_length' => 'User ID cannot exceed 5 characters',
-                'is_unique' => 'User ID already exists'
+                'max_length' => 'User ID cannot exceed 5 characters'
             ]
         ],
         'username' => [
-            'rules' => 'required|min_length[3]|max_length[50]|is_unique[user.username,id_user,{id_user}]',
+            'rules' => 'required|min_length[3]|max_length[50]',
             'errors' => [
                 'required' => 'Username is required',
                 'min_length' => 'Username must be at least 3 characters',
-                'max_length' => 'Username cannot exceed 50 characters',
-                'is_unique' => 'Username already exists'
+                'max_length' => 'Username cannot exceed 50 characters'
             ]
         ],
         'password' => [

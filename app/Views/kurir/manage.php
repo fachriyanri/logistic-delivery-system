@@ -114,40 +114,36 @@
                                     <div class="form-text">Maksimal 150 karakter (opsional)</div>
                                 </div>
 
-                                <!-- Password -->
+                                <?php if (!$isEdit): ?>
+                                <!-- Username (only for new kurir) -->
                                 <div class="mb-3">
-                                    <label for="password" class="form-label">
-                                        Password 
-                                        <?php if (!$isEdit): ?>
-                                        <span class="text-danger">*</span>
-                                        <?php endif; ?>
-                                    </label>
+                                    <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="username" 
+                                           name="username" 
+                                           value="<?= old('username') ?>"
+                                           minlength="3"
+                                           maxlength="50"
+                                           required>
+                                    <div class="form-text">Username untuk login kurir, minimal 3 karakter</div>
+                                </div>
+
+                                <!-- Password (only for new kurir) -->
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <input type="password" 
                                                class="form-control" 
                                                id="password" 
                                                name="password" 
                                                minlength="6"
-                                               <?= !$isEdit ? 'required' : '' ?>>
+                                               required>
                                         <button type="button" class="btn btn-outline-secondary" id="togglePassword">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
-                                    <div class="form-text">
-                                        <?= $isEdit ? 'Kosongkan jika tidak ingin mengubah password' : 'Minimal 6 karakter' ?>
-                                    </div>
-                                </div>
-
-                                <?php if ($isEdit): ?>
-                                <!-- Confirm Password (only for edit) -->
-                                <div class="mb-3">
-                                    <label for="confirm_password" class="form-label">Konfirmasi Password</label>
-                                    <input type="password" 
-                                           class="form-control" 
-                                           id="confirm_password" 
-                                           name="confirm_password" 
-                                           minlength="6">
-                                    <div class="form-text">Ulangi password baru jika ingin mengubah</div>
+                                    <div class="form-text">Password untuk login kurir, minimal 6 karakter</div>
                                 </div>
                                 <?php endif; ?>
                             </div>
@@ -159,9 +155,6 @@
                             <div>
                                 <button type="submit" name="action" value="save" class="btn btn-primary">
                                     <i class="fas fa-save"></i> Simpan
-                                </button>
-                                <button type="submit" name="action" value="save_and_close" class="btn btn-success">
-                                    <i class="fas fa-save"></i> Simpan & Tutup
                                 </button>
                             </div>
                             <a href="<?= base_url('kurir') ?>" class="btn btn-secondary">
@@ -215,20 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Password confirmation validation
-    const confirmPasswordField = document.getElementById('confirm_password');
-    if (confirmPasswordField) {
-        confirmPasswordField.addEventListener('input', function() {
-            const password = passwordField.value;
-            const confirmPassword = this.value;
-            
-            if (password && confirmPassword && password !== confirmPassword) {
-                this.setCustomValidity('Password tidak cocok');
-            } else {
-                this.setCustomValidity('');
-            }
-        });
-    }
+
 
     // Character counter for nama field
     const namaField = document.getElementById('nama');

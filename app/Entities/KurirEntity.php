@@ -12,7 +12,6 @@ class KurirEntity extends Entity
         'jenis_kelamin' => null,
         'telepon' => null,
         'alamat' => null,
-        'password' => null,
     ];
 
     protected $casts = [
@@ -21,7 +20,6 @@ class KurirEntity extends Entity
         'jenis_kelamin' => 'string',
         'telepon' => 'string',
         'alamat' => '?string',
-        'password' => 'string',
     ];
 
     protected $datamap = [];
@@ -73,22 +71,7 @@ class KurirEntity extends Entity
         return !empty($this->attributes['alamat']);
     }
 
-    /**
-     * Set password with hashing
-     */
-    public function setPassword(string $password): self
-    {
-        $this->attributes['password'] = password_hash($password, PASSWORD_ARGON2ID);
-        return $this;
-    }
 
-    /**
-     * Verify password
-     */
-    public function verifyPassword(string $password): bool
-    {
-        return password_verify($password, $this->attributes['password'] ?? '');
-    }
 
     /**
      * Check if courier is male

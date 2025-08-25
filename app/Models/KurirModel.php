@@ -18,25 +18,27 @@ class KurirModel extends Model
         'jenis_kelamin',
         'telepon',
         'alamat',
-        'password'
+        'created_at',
+        'updated_at'
     ];
 
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
+    protected $createdField = 'created_at';
+    protected $updatedField = 'updated_at';
 
     protected $validationRules = [
-        'id_kurir' => 'required|max_length[5]|is_unique[kurir.id_kurir,id_kurir,{id_kurir}]',
+        'id_kurir' => 'required|max_length[5]',
         'nama' => 'required|max_length[30]',
         'jenis_kelamin' => 'required|in_list[Laki-Laki,Perempuan]',
         'telepon' => 'required|max_length[15]',
         'alamat' => 'permit_empty|max_length[150]',
-        'password' => 'required|min_length[6]'
+        'password' => 'permit_empty' // Allow empty password temporarily
     ];
 
     protected $validationMessages = [
         'id_kurir' => [
             'required' => 'ID Kurir harus diisi',
-            'max_length' => 'ID Kurir maksimal 5 karakter',
-            'is_unique' => 'ID Kurir sudah terdaftar'
+            'max_length' => 'ID Kurir maksimal 5 karakter'
         ],
         'nama' => [
             'required' => 'Nama kurir harus diisi',
@@ -53,10 +55,7 @@ class KurirModel extends Model
         'alamat' => [
             'max_length' => 'Alamat maksimal 150 karakter'
         ],
-        'password' => [
-            'required' => 'Password harus diisi',
-            'min_length' => 'Password minimal 6 karakter'
-        ]
+        'password' => []
     ];
 
     /**
@@ -140,21 +139,45 @@ class KurirModel extends Model
      */
     public function saveKurir(array $data, string $id = ''): bool
     {
-        // Hash password if provided
-        if (!empty($data['password'])) {
-            $data['password'] = password_hash($data['password'], PASSWORD_ARGON2ID);
-        }
-
-        if (empty($id)) {
-            // Insert new courier
-            return $this->insert($data) !== false;
-        } else {
-            // Update existing courier
-            // Remove password from update if empty
-            if (empty($data['password'])) {
-                unset($data['password']);
+        // Debug: Log the data being saved
+        log_message('debug', 'KurirModel::saveKurir - Data: ' . json_encode($data));
+        log_message('debug', 'KurirModel::saveKurir - ID: ' . $id);
+        
+        // Ensure timestamps are set
+        $currentTime = date('Y-m-d H:i:s');
+        
+        try {
+            if (empty($id)) {
+                // Insert new courier - set both created_at and updated_at
+                if (!isset($data['created_at'])) {
+                    $data['created_at'] = $currentTime;
+                }
+                if (!isset($data['updated_at'])) {
+                    $data['updated_at'] = $currentTime;
+                }
+                
+                log_message('debug', 'KurirModel::saveKurir - Insert data with timestamps: ' . json_encode($data));
+                $result = $this->insert($data);
+                if ($result === false) {
+                    log_message('error', 'KurirModel::saveKurir - Insert failed. Errors: ' . json_encode($this->errors()));
+                }
+                return $result !== false;
+            } else {
+                // Update existing courier - only set updated_at
+                if (!isset($data['updated_at'])) {
+                    $data['updated_at'] = $currentTime;
+                }
+                
+                log_message('debug', 'KurirModel::saveKurir - Update data with timestamps: ' . json_encode($data));
+                $result = $this->update($id, $data);
+                if ($result === false) {
+                    log_message('error', 'KurirModel::saveKurir - Update failed. Errors: ' . json_encode($this->errors()));
+                }
+                return $result;
             }
-            return $this->update($id, $data);
+        } catch (\Exception $e) {
+            log_message('error', 'KurirModel::saveKurir - Exception: ' . $e->getMessage());
+            return false;
         }
     }
 
@@ -204,44 +227,7 @@ class KurirModel extends Model
         return $options;
     }
 
-    /**
-     * Authenticate courier login
-     */
-    public function authenticate(string $username, string $password): ?KurirEntity
-    {
-        $courier = $this->where('id_kurir', $username)->first();
-        
-        if ($courier && $courier->verifyPassword($password)) {
-            return $courier;
-        }
-        
-        return null;
-    }
 
-    /**
-     * Update courier password
-     * 
-     * Updates courier password with secure hashing using Argon2ID algorithm.
-     * Automatically hashes the password before storing in database.
-     * 
-     * @param string $courierId   The courier ID to update
-     * @param string $newPassword The new plain text password
-     * 
-     * @return bool True if update successful, false otherwise
-     * 
-     * @example
-     * // Update courier password
-     * $success = $kurirModel->updatePassword('KRR01', 'NewSecurePassword123');
-     * 
-     * @see password_hash() For secure password hashing
-     * @see PASSWORD_ARGON2ID Hashing algorithm constant
-     */
-    public function updatePassword(string $courierId, string $newPassword): bool
-    {
-        $hashedPassword = password_hash($newPassword, PASSWORD_ARGON2ID);
-        
-        return $this->update($courierId, ['password' => $hashedPassword]);
-    }
 
     /**
      * Check if phone number exists (excluding current ID)

@@ -24,6 +24,9 @@ $routes->get('/login', 'AuthController::index');
 $routes->post('/login', 'AuthController::authenticate');
 $routes->get('/logout', 'AuthController::logout');
 
+// Debug routes without authentication (remove in production)
+// $routes->get('debug/user-table', 'DebugController::userTable'); // Commented out for security
+
 // Profile and Password Routes (Protected)
 $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->get('profile', 'ProfileController::index');
