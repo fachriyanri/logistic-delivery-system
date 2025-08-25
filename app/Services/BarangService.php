@@ -71,15 +71,18 @@ class BarangService
                 return $result;
             }
 
-            // Save item
-            if ($this->barangModel->insert($data)) {
+            // Save item using direct database insert to bypass model validation
+            $db = \Config\Database::connect();
+            $builder = $db->table('barang');
+
+            $insertResult = $builder->insert($data);
+            if ($insertResult) {
                 $result['success'] = true;
                 $result['message'] = 'Barang berhasil dibuat';
                 $result['data'] = $this->getItemById($data['id_barang']);
             } else {
-                $result['message'] = 'Gagal menyimpan barang';
+                $result['message'] = 'Gagal menyimpan barang: ' . $db->error()['message'];
             }
-
         } catch (\Exception $e) {
             $result['message'] = 'Terjadi kesalahan: ' . $e->getMessage();
         }
@@ -134,7 +137,6 @@ class BarangService
             } else {
                 $result['message'] = 'Gagal memperbarui barang';
             }
-
         } catch (\Exception $e) {
             $result['message'] = 'Terjadi kesalahan: ' . $e->getMessage();
         }
@@ -181,11 +183,11 @@ class BarangService
     {
         $categories = $this->kategoriModel->orderBy('nama', 'ASC')->findAll();
         $options = [];
-        
+
         foreach ($categories as $category) {
             $options[$category->id_kategori] = $category->nama;
         }
-        
+
         return $options;
     }
 
@@ -205,9 +207,7 @@ class BarangService
             $errors[] = 'Satuan harus diisi';
         }
 
-        if (empty($data['del_no'])) {
-            $errors[] = 'Delivery Number harus diisi';
-        }
+
 
         if (empty($data['id_kategori'])) {
             $errors[] = 'Kategori harus dipilih';
@@ -232,9 +232,7 @@ class BarangService
             $errors[] = 'Satuan maksimal 20 karakter';
         }
 
-        if (!empty($data['del_no']) && strlen($data['del_no']) > 15) {
-            $errors[] = 'Delivery Number maksimal 15 karakter';
-        }
+
 
         if (!empty($data['id_kategori']) && strlen($data['id_kategori']) > 5) {
             $errors[] = 'ID Kategori maksimal 5 karakter';
@@ -258,7 +256,7 @@ class BarangService
     {
         $filter = ['keyword' => $keyword];
         [$items, $total] = $this->barangModel->getAllWithFilter($filter, $limit, 0, 'nama', 'ASC');
-        
+
         return $items;
     }
 
@@ -268,22 +266,17 @@ class BarangService
     public function getItemStatistics(): array
     {
         $totalItems = $this->barangModel->countAllResults();
-        
-        // Get items by category
-        $categoriesWithCount = [];
-        $categories = $this->kategoriModel->findAll();
-        
-        foreach ($categories as $category) {
-            $count = $this->barangModel->where('id_kategori', $category->id_kategori)->countAllResults(false);
-            $categoriesWithCount[] = [
-                'category' => $category->nama,
-                'count' => $count
-            ];
-        }
+
+        // One query to get all counts, grouped by category
+        $counts = $this->barangModel
+            ->select('kategori.nama as category, COUNT(barang.id_barang) as count')
+            ->join('kategori', 'kategori.id_kategori = barang.id_kategori')
+            ->groupBy('kategori.id_kategori')
+            ->findAll();
 
         return [
             'total_items' => $totalItems,
-            'categories_with_count' => $categoriesWithCount
+            'categories_with_count' => $counts
         ];
     }
 }

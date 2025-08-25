@@ -16,45 +16,13 @@ class BarangModel extends Model
         'id_barang',
         'nama',
         'satuan',
-        'del_no',
         'id_kategori'
     ];
 
     protected $useTimestamps = false;
 
-    protected $validationRules = [
-        'id_barang' => 'required|max_length[7]|is_unique[barang.id_barang,id_barang,{id_barang}]',
-        'nama' => 'required|max_length[30]|is_unique[barang.nama,id_barang,{id_barang}]',
-        'satuan' => 'required|max_length[20]',
-        'del_no' => 'required|max_length[15]',
-        'id_kategori' => 'required|max_length[5]|is_not_unique[kategori.id_kategori]'
-    ];
-
-    protected $validationMessages = [
-        'id_barang' => [
-            'required' => 'ID Barang harus diisi',
-            'max_length' => 'ID Barang maksimal 7 karakter',
-            'is_unique' => 'ID Barang sudah terdaftar'
-        ],
-        'nama' => [
-            'required' => 'Nama barang harus diisi',
-            'max_length' => 'Nama barang maksimal 30 karakter',
-            'is_unique' => 'Nama barang sudah terdaftar'
-        ],
-        'satuan' => [
-            'required' => 'Satuan harus diisi',
-            'max_length' => 'Satuan maksimal 20 karakter'
-        ],
-        'del_no' => [
-            'required' => 'Delivery Number harus diisi',
-            'max_length' => 'Delivery Number maksimal 15 karakter'
-        ],
-        'id_kategori' => [
-            'required' => 'Kategori harus dipilih',
-            'max_length' => 'ID Kategori maksimal 5 karakter',
-            'is_not_unique' => 'Kategori tidak valid'
-        ]
-    ];
+    protected $validationRules = [];
+    protected $validationMessages = [];
 
     /**
      * Get all items with category information and filtering
@@ -72,7 +40,6 @@ class BarangModel extends Model
                     ->like('LOWER(b.id_barang)', $keyword)
                     ->orLike('LOWER(b.nama)', $keyword)
                     ->orLike('LOWER(b.satuan)', $keyword)
-                    ->orLike('LOWER(b.del_no)', $keyword)
                     ->orLike('LOWER(k.nama)', $keyword)
                     ->orLike('LOWER(k.id_kategori)', $keyword)
                     ->groupEnd();

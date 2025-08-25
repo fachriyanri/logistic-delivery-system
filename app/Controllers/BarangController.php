@@ -102,7 +102,6 @@ class BarangController extends BaseController
             'id_barang' => $post['id_barang'] ?? '',
             'nama' => $post['nama'] ?? '',
             'satuan' => $post['satuan'] ?? '',
-            'del_no' => $post['del_no'] ?? '',
             'id_kategori' => $post['id_kategori'] ?? ''
         ];
 
@@ -125,13 +124,7 @@ class BarangController extends BaseController
 
         if ($result['success']) {
             session()->setFlashdata('success', $result['message']);
-            
-            if ($action === 'save') {
-                $redirectId = $result['data']->id_barang ?? $id;
-                return redirect()->to('/barang/manage/' . $redirectId);
-            } else {
-                return redirect()->to('/barang');
-            }
+            return redirect()->to('/barang');
         } else {
             session()->setFlashdata('error', $result['message']);
             return redirect()->to('/barang/manage/' . $id)->withInput();
@@ -256,8 +249,7 @@ class BarangController extends BaseController
             $results[] = [
                 'id' => $item->id_barang,
                 'nama' => $item->nama,
-                'satuan' => $item->satuan,
-                'del_no' => $item->del_no
+                'satuan' => $item->satuan
             ];
         }
         

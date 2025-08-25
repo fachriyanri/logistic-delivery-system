@@ -103,19 +103,7 @@
                                     <div class="form-text">Maksimal 20 karakter</div>
                                 </div>
 
-                                <!-- Delivery Number -->
-                                <div class="mb-3">
-                                    <label for="del_no" class="form-label">Delivery Number <span class="text-danger">*</span></label>
-                                    <input type="text" 
-                                           class="form-control" 
-                                           id="del_no" 
-                                           name="del_no" 
-                                           value="<?= old('del_no', $barang->del_no ?? '') ?>"
-                                           maxlength="15"
-                                           placeholder="contoh: Box, Pallet"
-                                           required>
-                                    <div class="form-text">Maksimal 15 karakter</div>
-                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -123,11 +111,8 @@
                     <div class="card-footer">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <button type="submit" name="action" value="save" class="btn btn-primary">
+                                <button type="submit" name="action" value="save_and_close" class="btn btn-primary">
                                     <i class="fas fa-save"></i> Simpan
-                                </button>
-                                <button type="submit" name="action" value="save_and_close" class="btn btn-success">
-                                    <i class="fas fa-save"></i> Simpan & Tutup
                                 </button>
                             </div>
                             <a href="<?= base_url('barang') ?>" class="btn btn-secondary">
@@ -204,24 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
         updateSatuanCounter();
     }
 
-    // Character counter for del_no field
-    const delNoField = document.getElementById('del_no');
-    if (delNoField) {
-        const maxLength = 15;
-        const counter = document.createElement('div');
-        counter.className = 'form-text text-end';
-        counter.style.fontSize = '0.8em';
-        delNoField.parentNode.appendChild(counter);
 
-        function updateDelNoCounter() {
-            const remaining = maxLength - delNoField.value.length;
-            counter.textContent = `${delNoField.value.length}/${maxLength} karakter`;
-            counter.className = remaining < 3 ? 'form-text text-end text-warning' : 'form-text text-end text-muted';
-        }
-
-        delNoField.addEventListener('input', updateDelNoCounter);
-        updateDelNoCounter();
-    }
 });
 </script>
 <?= $this->endSection() ?>

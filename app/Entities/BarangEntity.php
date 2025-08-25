@@ -10,7 +10,6 @@ class BarangEntity extends Entity
         'id_barang' => null,
         'nama' => null,
         'satuan' => null,
-        'del_no' => null,
         'id_kategori' => null,
         // Virtual fields from joins
         'kategori_nama' => null,
@@ -21,7 +20,6 @@ class BarangEntity extends Entity
         'id_barang' => 'string',
         'nama' => 'string',
         'satuan' => 'string',
-        'del_no' => 'string',
         'id_kategori' => 'string',
         'kategori_nama' => '?string',
         'kategori_keterangan' => '?string',
@@ -53,13 +51,7 @@ class BarangEntity extends Entity
         return $this->attributes['satuan'] ?? '';
     }
 
-    /**
-     * Get the delivery number
-     */
-    public function getDeliveryNumber(): string
-    {
-        return $this->attributes['del_no'] ?? '';
-    }
+
 
     /**
      * Get full item description

@@ -13,6 +13,7 @@ class DetailPengirimanEntity extends Entity
         'qty' => null,
         // Virtual fields from joins
         'barang_nama' => null,
+        'barang_nama' => null,
         'barang_satuan' => null,
         'barang_del_no' => null,
         'kategori_nama' => null,
@@ -23,6 +24,8 @@ class DetailPengirimanEntity extends Entity
         'id_pengiriman' => 'string',
         'id_barang' => 'string',
         'qty' => 'integer',
+        'harga' => 'float',
+        'barang_nama' => null,
         'barang_nama' => '?string',
         'barang_satuan' => '?string',
         'barang_del_no' => '?string',

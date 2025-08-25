@@ -95,7 +95,6 @@
                                     </th>
                                     <th>Kategori</th>
                                     <th>Satuan</th>
-                                    <th>Del No</th>
                                     <th width="150">Aksi</th>
                                 </tr>
                             </thead>
@@ -107,7 +106,6 @@
                                         <td><?= esc($barang->nama) ?></td>
                                         <td><?= esc($barang->getCategoryName()) ?></td>
                                         <td><?= esc($barang->satuan) ?></td>
-                                        <td><?= esc($barang->del_no) ?></td>
                                         <td>
                                             <div class="btn-group" role="group">
                                                 <a href="<?= base_url('barang/manage/' . $barang->id_barang) ?>" 
@@ -126,7 +124,7 @@
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="6" class="text-center">Tidak ada data barang</td>
+                                        <td colspan="5" class="text-center">Tidak ada data barang</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
