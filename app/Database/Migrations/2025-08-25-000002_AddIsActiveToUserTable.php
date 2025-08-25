@@ -8,19 +8,25 @@ class AddIsActiveToUserTable extends Migration
 {
     public function up()
     {
-        $this->forge->addColumn('user', [
-            'is_active' => [
-                'type'       => 'TINYINT',
-                'constraint' => 1,
-                'default'    => 1,
-                'null'       => false,
-                'after'      => 'level'
-            ]
-        ]);
+        if (! $this->db->fieldExists('is_active', 'user')) {
+            $fields = [
+                'is_active' => [
+                    'type'       => 'TINYINT',
+                    'constraint' => 1,
+                    'null'       => false,
+                    'default'    => 1,
+                    'after'      => 'level' // or wherever it should go
+                ],
+            ];
+            $this->forge->addColumn('user', $fields);
+        }
     }
 
     public function down()
     {
-        $this->forge->dropColumn('user', 'is_active');
+        // Make the down method robust too
+        if ($this->db->fieldExists('is_active', 'user')) {
+            $this->forge->dropColumn('user', 'is_active');
+        }
     }
 }

@@ -211,13 +211,13 @@
 
                         <?php if (session('level') == 1 || session('level') == 2): ?>
                         <div class="col-lg-3 col-md-6 mb-3">
-                            <div class="card quick-action-card h-100" onclick="window.location.href='<?= base_url('/laporan') ?>'">
+                            <div class="card quick-action-card h-100" onclick="window.location.href='<?= base_url('/pengiriman/export') ?>'">
                                 <div class="card-body text-center">
                                     <div class="mb-3">
-                                        <i class="fas fa-chart-line fa-2x text-info"></i>
+                                        <i class="fas fa-file-excel fa-2x text-success"></i>
                                     </div>
-                                    <h6 class="card-title">View Reports</h6>
-                                    <p class="card-text text-muted small">Generate shipping reports</p>
+                                    <h6 class="card-title">Export Shipments</h6>
+                                    <p class="card-text text-muted small">Download shipments Excel report</p>
                                 </div>
                             </div>
                         </div>
@@ -225,7 +225,7 @@
 
                         <?php if (session('level') == 1 || session('level') == 3): ?>
                         <div class="col-lg-3 col-md-6 mb-3">
-                            <div class="card quick-action-card h-100" onclick="window.location.href='<?= base_url('/barang/create') ?>'">
+                            <div class="card quick-action-card h-100" onclick="window.location.href='<?= base_url('/barang/manage') ?>'">
                                 <div class="card-body text-center">
                                     <div class="mb-3">
                                         <i class="fas fa-box fa-2x text-warning"></i>

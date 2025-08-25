@@ -159,6 +159,9 @@ $routes->group('laporan', ['filter' => 'auth'], static function ($routes) {
 $routes->group('settings', ['filter' => 'auth'], static function ($routes) {
     $routes->get('password', 'PasswordController::index');
     $routes->post('password', 'PasswordController::update');
+    $routes->get('database-stats', 'SettingsController::getDatabaseStats');
+    $routes->get('system-info', 'SettingsController::getSystemInfo');
+    $routes->get('run-migration', 'SettingsController::runMigration');
 });
 
 // API Routes

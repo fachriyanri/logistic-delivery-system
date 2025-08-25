@@ -638,25 +638,52 @@ class PengirimanController extends BaseController
      */
     public function export(): ResponseInterface
     {
-        // Get filter parameters
+        // Get filter parameters with same mapping as index method
+        $search = trim($this->request->getGet('search') ?? '');
+        $status = trim($this->request->getGet('status') ?? '');
+        $tanggal_dari = trim($this->request->getGet('tanggal_dari') ?? '');
+        $tanggal_sampai = trim($this->request->getGet('tanggal_sampai') ?? '');
+
         $filter = [
-            'search' => trim($this->request->getGet('search') ?? ''),
-            'status' => trim($this->request->getGet('status') ?? ''),
-            'tanggal_dari' => trim($this->request->getGet('tanggal_dari') ?? ''),
-            'tanggal_sampai' => trim($this->request->getGet('tanggal_sampai') ?? ''),
+            'keyword' => $search,
+            'status' => $status,
+            'from' => $tanggal_dari,
+            'to' => $tanggal_sampai
         ];
+
+        // Remove empty filters
+        $filter = array_filter($filter, function($value) {
+            return $value !== '' && $value !== null;
+        });
 
         // Get all shipments for export
         [$shipments, $total] = $this->pengirimanService->getAllShipments($filter, 0, 0);
 
-        // Generate Excel file
+        // Create Excel file using PhpSpreadsheet
         $filename = 'pengiriman_' . date('Y-m-d_H-i-s') . '.xlsx';
         
-        // Here you would use a library like PhpSpreadsheet to generate Excel
-        // For now, we'll return CSV format
+        // Set proper headers for Excel download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
         
-        $output = "ID Pengiriman,Tanggal,No PO,Pelanggan,Kurir,No Kendaraan,Penerima,Status\n";
+        // Create new Spreadsheet object
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
         
+        // Set column headers
+        $sheet->setCellValue('A1', 'ID Pengiriman')
+              ->setCellValue('B1', 'Tanggal')
+              ->setCellValue('C1', 'No PO')
+              ->setCellValue('D1', 'Pelanggan')
+              ->setCellValue('E1', 'Kurir')
+              ->setCellValue('F1', 'No Kendaraan')
+              ->setCellValue('G1', 'Penerima')
+              ->setCellValue('H1', 'Status')
+              ->setCellValue('I1', 'Keterangan');
+        
+        // Add data
+        $row = 2;
         foreach ($shipments as $shipment) {
             $statusText = '';
             switch ($shipment->status) {
@@ -664,24 +691,42 @@ class PengirimanController extends BaseController
                 case 2: $statusText = 'Dalam Perjalanan'; break;
                 case 3: $statusText = 'Terkirim'; break;
                 case 4: $statusText = 'Dibatalkan'; break;
+                default: $statusText = 'Unknown'; break;
             }
             
-            $output .= sprintf(
-                '"%s","%s","%s","%s","%s","%s","%s","%s"' . "\n",
-                $shipment->id_pengiriman,
-                date('d/m/Y', strtotime($shipment->tanggal)),
-                $shipment->no_po,
-                $shipment->nama_pelanggan ?? '',
-                $shipment->nama_kurir ?? '',
-                $shipment->no_kendaraan,
-                $shipment->penerima,
-                $statusText
-            );
+            $sheet->setCellValue('A' . $row, $shipment->id_pengiriman)
+                  ->setCellValue('B' . $row, date('d/m/Y', strtotime($shipment->tanggal)))
+                  ->setCellValue('C' . $row, $shipment->no_po ?? '')
+                  ->setCellValue('D' . $row, $shipment->nama_pelanggan ?? '')
+                  ->setCellValue('E' . $row, $shipment->nama_kurir ?? '')
+                  ->setCellValue('F' . $row, $shipment->no_kendaraan ?? '')
+                  ->setCellValue('G' . $row, $shipment->penerima ?? '')
+                  ->setCellValue('H' . $row, $statusText)
+                  ->setCellValue('I' . $row, $shipment->keterangan ?? '');
+            $row++;
         }
-
-        return $this->response
-            ->setHeader('Content-Type', 'text/csv')
-            ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
-            ->setBody($output);
+        
+        // Auto-size columns
+        foreach (range('A', 'I') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+        
+        // Freeze the first row
+        $sheet->freezePane('A2');
+        
+        // Style the header row
+        $headerStyle = [
+            'font' => ['bold' => true],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'E0E0E0']
+            ]
+        ];
+        $sheet->getStyle('A1:I1')->applyFromArray($headerStyle);
+        
+        // Redirect output to a client's web browser (Xlsx)
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
     }
 }
