@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use CodeIgniter\Database\BaseConnection;
 use App\Models\BarangModel;
 use App\Models\KategoriModel;
 use App\Entities\BarangEntity;
@@ -10,11 +11,13 @@ class BarangService
 {
     protected BarangModel $barangModel;
     protected KategoriModel $kategoriModel;
+    protected BaseConnection $db;
 
     public function __construct()
     {
-        $this->barangModel = new BarangModel();
-        $this->kategoriModel = new KategoriModel();
+        $this->barangModel = model('BarangModel');
+        $this->kategoriModel = model('KategoriModel');
+        $this->db = \Config\Database::connect();
     }
 
     /**
@@ -46,42 +49,57 @@ class BarangService
                 $data['id_barang'] = $this->barangModel->generateNextId();
             }
 
-            // Validate data
-            $validationErrors = $this->validateItemData($data);
-            if (!empty($validationErrors)) {
-                $result['message'] = implode(', ', $validationErrors);
+            // Use CodeIgniter's validation library
+            $validation = \Config\Services::validation();
+
+            // Define the validation rules
+            $validation->setRules([
+                'id_barang' => 'required|max_length[7]|regex_match[/^BRG\d{4}$/]|is_unique[barang.id_barang]',
+                'nama'      => 'required|max_length[30]|is_unique[barang.nama]',
+                'satuan'    => 'required|max_length[20]',
+                'harga'     => 'permit_empty|decimal|greater_than_equal_to[0]',
+                'id_kategori' => 'required|max_length[5]|is_not_unique[kategori.id_kategori]'
+            ]);
+
+            if (!$validation->run($data)) {
+                $result['message'] = implode(', ', $validation->getErrors());
                 return $result;
             }
 
-            // Check if ID already exists
-            if ($this->barangModel->find($data['id_barang'])) {
-                $result['message'] = 'ID Barang sudah terdaftar';
-                return $result;
+            // Ensure harga has a default value
+            if (!isset($data['harga']) || $data['harga'] === '') {
+                $data['harga'] = 0.00;
             }
 
-            // Check if name already exists
-            if ($this->barangModel->isNameExists($data['nama'])) {
-                $result['message'] = 'Nama barang sudah terdaftar';
-                return $result;
-            }
+            // Debug logging (remove in production)
+            log_message('debug', 'BarangService::createItem - Data to insert: ' . json_encode($data));
 
-            // Check if category exists
-            if (!$this->kategoriModel->find($data['id_kategori'])) {
-                $result['message'] = 'Kategori tidak valid';
-                return $result;
-            }
-
-            // Save item using direct database insert to bypass model validation
-            $db = \Config\Database::connect();
-            $builder = $db->table('barang');
-
-            $insertResult = $builder->insert($data);
-            if ($insertResult) {
+            // Use the model to insert (unified approach)
+            $insertResult = $this->barangModel->insert($data);
+            
+            if ($insertResult !== false) {
                 $result['success'] = true;
                 $result['message'] = 'Barang berhasil dibuat';
                 $result['data'] = $this->getItemById($data['id_barang']);
             } else {
-                $result['message'] = 'Gagal menyimpan barang: ' . $db->error()['message'];
+                // Get detailed error information
+                $modelErrors = $this->barangModel->errors();
+                $dbError = $this->db->error();
+                
+                $errorMessage = 'Gagal menyimpan barang';
+                
+                if (!empty($modelErrors)) {
+                    $errorMessage .= ': ' . implode(', ', $modelErrors);
+                } elseif (!empty($dbError['message'])) {
+                    $errorMessage .= ': ' . $dbError['message'];
+                    
+                    // Check if it's a column doesn't exist error
+                    if (strpos($dbError['message'], 'harga') !== false && strpos($dbError['message'], "doesn't exist") !== false) {
+                        $errorMessage .= '. Kolom harga belum ada di database. Jalankan migration dengan: php spark migrate';
+                    }
+                }
+                
+                $result['message'] = $errorMessage;
             }
         } catch (\Exception $e) {
             $result['message'] = 'Terjadi kesalahan: ' . $e->getMessage();
@@ -108,34 +126,34 @@ class BarangService
             // Remove id_barang from update data to prevent changing primary key
             unset($data['id_barang']);
 
-            // Validate data
-            $data['id_barang'] = $id; // Add for validation context
-            $validationErrors = $this->validateItemData($data, $id);
-            if (!empty($validationErrors)) {
-                $result['message'] = implode(', ', $validationErrors);
-                return $result;
-            }
-            unset($data['id_barang']); // Remove again for update
+            // Use CodeIgniter's validation library
+            $validation = \Config\Services::validation();
 
-            // Check if name already exists (excluding current record)
-            if (isset($data['nama']) && $this->barangModel->isNameExists($data['nama'], $id)) {
-                $result['message'] = 'Nama barang sudah terdaftar';
-                return $result;
-            }
+            // Define the validation rules for update
+            $validation->setRules([
+                'nama'      => 'permit_empty|max_length[30]|is_unique[barang.nama,id_barang,' . $id . ']',
+                'satuan'    => 'permit_empty|max_length[20]',
+                'harga'     => 'permit_empty|decimal|greater_than_equal_to[0]',
+                'id_kategori' => 'permit_empty|max_length[5]|is_not_unique[kategori.id_kategori]'
+            ]);
 
-            // Check if category exists
-            if (isset($data['id_kategori']) && !$this->kategoriModel->find($data['id_kategori'])) {
-                $result['message'] = 'Kategori tidak valid';
+            if (!$validation->run($data)) {
+                $result['message'] = implode(', ', $validation->getErrors());
                 return $result;
             }
 
-            // Update item
+            // Ensure harga has a default value if provided but empty
+            if (isset($data['harga']) && $data['harga'] === '') {
+                $data['harga'] = 0.00;
+            }
+
+            // Update item using model
             if ($this->barangModel->update($id, $data)) {
                 $result['success'] = true;
                 $result['message'] = 'Barang berhasil diperbarui';
                 $result['data'] = $this->getItemById($id);
             } else {
-                $result['message'] = 'Gagal memperbarui barang';
+                $result['message'] = 'Gagal memperbarui barang: ' . implode(', ', $this->barangModel->errors());
             }
         } catch (\Exception $e) {
             $result['message'] = 'Terjadi kesalahan: ' . $e->getMessage();
@@ -192,7 +210,7 @@ class BarangService
     }
 
     /**
-     * Validate item data
+     * Validate item data (legacy method for backward compatibility)
      */
     public function validateItemData(array $data, string $id = ''): array
     {
@@ -206,8 +224,6 @@ class BarangService
         if (empty($data['satuan'])) {
             $errors[] = 'Satuan harus diisi';
         }
-
-
 
         if (empty($data['id_kategori'])) {
             $errors[] = 'Kategori harus dipilih';
@@ -232,10 +248,18 @@ class BarangService
             $errors[] = 'Satuan maksimal 20 karakter';
         }
 
-
-
         if (!empty($data['id_kategori']) && strlen($data['id_kategori']) > 5) {
             $errors[] = 'ID Kategori maksimal 5 karakter';
+        }
+
+        // Validate harga
+        if (isset($data['harga'])) {
+            if (!is_numeric($data['harga']) && $data['harga'] !== '') {
+                $errors[] = 'Harga harus berupa angka';
+            }
+            if (is_numeric($data['harga']) && $data['harga'] < 0) {
+                $errors[] = 'Harga tidak boleh negatif';
+            }
         }
 
         return $errors;

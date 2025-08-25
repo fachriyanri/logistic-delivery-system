@@ -103,6 +103,23 @@
                                     <div class="form-text">Maksimal 20 karakter</div>
                                 </div>
 
+                                <!-- Harga -->
+                                <div class="mb-3">
+                                    <label for="harga" class="form-label">Harga</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="harga" 
+                                               name="harga" 
+                                               value="<?= old('harga', $barang->harga ?? '') ?>"
+                                               min="0"
+                                               step="0.01"
+                                               placeholder="0.00">
+                                    </div>
+                                    <div class="form-text">Masukkan harga dalam Rupiah (opsional)</div>
+                                </div>
+
 
                             </div>
                         </div>
@@ -187,6 +204,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
         satuanField.addEventListener('input', updateSatuanCounter);
         updateSatuanCounter();
+    }
+
+    // Format harga field
+    const hargaField = document.getElementById('harga');
+    if (hargaField) {
+        // Format number with proper decimal places
+        hargaField.addEventListener('blur', function() {
+            if (this.value && !isNaN(this.value)) {
+                this.value = parseFloat(this.value).toFixed(2);
+            }
+        });
+
+        // Validate positive numbers only
+        hargaField.addEventListener('input', function() {
+            if (this.value < 0) {
+                this.value = 0;
+            }
+        });
     }
 
 

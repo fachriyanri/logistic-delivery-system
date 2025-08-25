@@ -102,6 +102,7 @@ class BarangController extends BaseController
             'id_barang' => $post['id_barang'] ?? '',
             'nama' => $post['nama'] ?? '',
             'satuan' => $post['satuan'] ?? '',
+            'harga' => $post['harga'] ?? 0.00,
             'id_kategori' => $post['id_kategori'] ?? ''
         ];
 

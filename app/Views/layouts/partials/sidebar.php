@@ -77,21 +77,6 @@ $currentUri = uri_string();
                     </a>
                 </li>
 
-                <!-- Reports Section (Admin & Finance) -->
-                <?php if ($userLevel == 1 || $userLevel == 2): ?>
-                <li class="nav-section">
-                    <span class="nav-section-title">Reports</span>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link <?= (strpos($currentUri, 'laporan') !== false) ? 'active' : '' ?>" 
-                       href="<?= base_url('/laporan') ?>">
-                        <i class="fas fa-chart-bar nav-icon"></i>
-                        <span class="nav-text">Shipping Reports</span>
-                    </a>
-                </li>
-                <?php endif; ?>
-
                 <!-- Administration Section (Admin only) -->
                 <?php if ($userLevel == 1): ?>
                 <li class="nav-section">
@@ -202,22 +187,6 @@ $currentUri = uri_string();
                         <span class="nav-text">Shipments</span>
                     </a>
                 </li>
-
-                <!-- Reports Section (Admin & Finance) -->
-                <?php if ($userLevel == 1 || $userLevel == 2): ?>
-                <li class="nav-section">
-                    <span class="nav-section-title">Reports</span>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link <?= (strpos($currentUri, 'laporan') !== false) ? 'active' : '' ?>" 
-                       href="<?= base_url('/laporan') ?>"
-                       data-bs-dismiss="offcanvas">
-                        <i class="fas fa-chart-bar nav-icon"></i>
-                        <span class="nav-text">Shipping Reports</span>
-                    </a>
-                </li>
-                <?php endif; ?>
 
                 <!-- Administration Section (Admin only) -->
                 <?php if ($userLevel == 1): ?>

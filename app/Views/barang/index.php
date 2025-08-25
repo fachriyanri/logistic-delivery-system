@@ -95,6 +95,15 @@
                                     </th>
                                     <th>Kategori</th>
                                     <th>Satuan</th>
+                                    <th>
+                                        <a href="<?= current_url() ?>?<?= http_build_query(array_merge($_GET, ['orderBy' => 'harga', 'orderType' => $orderType === 'ASC' ? 'DESC' : 'ASC'])) ?>" 
+                                           class="text-white text-decoration-none">
+                                            Harga
+                                            <?php if ($orderBy === 'harga'): ?>
+                                                <i class="fas fa-sort-<?= $orderType === 'ASC' ? 'up' : 'down' ?>"></i>
+                                            <?php endif; ?>
+                                        </a>
+                                    </th>
                                     <th width="150">Aksi</th>
                                 </tr>
                             </thead>
@@ -106,6 +115,7 @@
                                         <td><?= esc($barang->nama) ?></td>
                                         <td><?= esc($barang->getCategoryName()) ?></td>
                                         <td><?= esc($barang->satuan) ?></td>
+                                        <td><?= esc($barang->getFormattedPrice()) ?></td>
                                         <td>
                                             <div class="btn-group" role="group">
                                                 <a href="<?= base_url('barang/manage/' . $barang->id_barang) ?>" 
@@ -124,7 +134,7 @@
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="5" class="text-center">Tidak ada data barang</td>
+                                        <td colspan="6" class="text-center">Tidak ada data barang</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>

@@ -10,6 +10,7 @@ class BarangEntity extends Entity
         'id_barang' => null,
         'nama' => null,
         'satuan' => null,
+        'harga' => null,
         'id_kategori' => null,
         // Virtual fields from joins
         'kategori_nama' => null,
@@ -20,6 +21,7 @@ class BarangEntity extends Entity
         'id_barang' => 'string',
         'nama' => 'string',
         'satuan' => 'string',
+        'harga' => 'float',
         'id_kategori' => 'string',
         'kategori_nama' => '?string',
         'kategori_keterangan' => '?string',
@@ -49,6 +51,22 @@ class BarangEntity extends Entity
     public function getUnit(): string
     {
         return $this->attributes['satuan'] ?? '';
+    }
+
+    /**
+     * Get the price
+     */
+    public function getPrice(): float
+    {
+        return (float) ($this->attributes['harga'] ?? 0.00);
+    }
+
+    /**
+     * Get formatted price for display
+     */
+    public function getFormattedPrice(): string
+    {
+        return 'Rp ' . number_format($this->getPrice(), 2, ',', '.');
     }
 
 
