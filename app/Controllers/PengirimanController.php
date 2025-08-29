@@ -80,7 +80,8 @@ class PengirimanController extends BaseController
             'kurir' => $this->pengirimanService->getCouriersForSelect(),
             'barang' => $this->pengirimanService->getItemsForSelect(),
             'statusOptions' => $this->pengirimanService->getStatusOptions(),
-            'autocode' => $this->pengirimanService->generateNextId()
+            'autocode' => $this->pengirimanService->generateNextId(),
+            'autoPO' => $id ? null : $this->pengirimanService->generatePONumber()
         ];
 
         if ($id) {
@@ -119,19 +120,18 @@ class PengirimanController extends BaseController
             'no_po' => $post['no_po'] ?? '',
             'no_kendaraan' => $post['no_kendaraan'] ?? '',
             'status' => (int) ($post['status'] ?? 1),
-            'keterangan' => $post['keterangan'] ?? '',
-            'penerima' => $post['penerima'] ?? ''
+            'keterangan' => $post['keterangan'] ?? ''
         ];
 
         // Prepare details data
         $details = [];
         if (!empty($post['items']) && is_array($post['items'])) {
             foreach ($post['items'] as $item) {
-                if (!empty($item['id_barang']) && !empty($item['jumlah'])) {
+                if (!empty($item['id_barang']) && !empty($item['qty'])) {
                     $details[] = [
                         'id_barang' => $item['id_barang'],
-                        'qty' => (int) $item['jumlah'],
-                        'keterangan' => $item['keterangan'] ?? ''
+                        'qty' => (int) $item['qty']
+                        // Note: keterangan field doesn't exist in detail_pengiriman table
                     ];
                 }
             }
@@ -252,6 +252,60 @@ class PengirimanController extends BaseController
     }
 
     /**
+     * AJAX endpoint to generate unique PO number
+     */
+    public function generatePO(): ResponseInterface
+    {
+        try {
+            $poNumber = $this->pengirimanService->generatePONumber();
+            
+            return $this->response->setJSON([
+                'success' => true,
+                'po_number' => $poNumber
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Failed to generate PO number: ' . $e->getMessage());
+            
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Gagal generate nomor PO'
+            ]);
+        }
+    }
+
+    /**
+     * Debug endpoint to capture POST data
+     */
+    public function debugStore(): ResponseInterface
+    {
+        $post = $this->request->getPost();
+        $raw = $this->request->getRawInput();
+        
+        $debug = [
+            'method' => $this->request->getMethod(),
+            'post_data' => $post,
+            'raw_input' => $raw,
+            'content_type' => $this->request->getHeaderLine('Content-Type'),
+            'items_analysis' => []
+        ];
+        
+        if (isset($post['items'])) {
+            foreach ($post['items'] as $index => $item) {
+                $debug['items_analysis'][$index] = [
+                    'id_barang' => $item['id_barang'] ?? 'missing',
+                    'qty' => $item['qty'] ?? 'missing',
+                    'keterangan' => $item['keterangan'] ?? 'missing',
+                    'valid' => !empty($item['id_barang']) && !empty($item['qty'])
+                ];
+            }
+        }
+        
+        return $this->response->setJSON($debug);
+    }
+
+
+
+    /**
      * Get shipment details (AJAX)
      */
     public function getDetails(): ResponseInterface
@@ -322,8 +376,18 @@ class PengirimanController extends BaseController
     {
         $post = $this->request->getPost();
         
+        // CRITICAL DEBUG: Log the raw POST data
+        log_message('critical', 'PengirimanController::store - RAW POST DATA: ' . json_encode($post));
+        
         if (!$post) {
+            log_message('critical', 'PengirimanController::store - No POST data received');
             return redirect()->to('/pengiriman');
+        }
+
+        // Auto-generate PO number if empty
+        $noPO = $post['no_po'] ?? '';
+        if (empty($noPO)) {
+            $noPO = $this->pengirimanService->generatePONumber();
         }
 
         // Prepare shipment data
@@ -332,34 +396,29 @@ class PengirimanController extends BaseController
             'tanggal' => $post['tanggal'] ?? date('Y-m-d'),
             'id_pelanggan' => $post['id_pelanggan'] ?? '',
             'id_kurir' => $post['id_kurir'] ?? '',
-            'no_po' => $post['no_po'] ?? '',
+            'no_po' => $noPO,
             'no_kendaraan' => $post['no_kendaraan'] ?? '',
             'status' => (int) ($post['status'] ?? 1),
-            'keterangan' => $post['keterangan'] ?? '',
-            'penerima' => $post['penerima'] ?? ''
+            'keterangan' => $post['keterangan'] ?? ''
         ];
 
         // Prepare details data
         $details = [];
         if (!empty($post['items']) && is_array($post['items'])) {
             foreach ($post['items'] as $item) {
-                if (!empty($item['id_barang']) && !empty($item['jumlah'])) {
+                if (!empty($item['id_barang']) && !empty($item['qty'])) {
                     $details[] = [
                         'id_barang' => $item['id_barang'],
-                        'jumlah' => (int) $item['jumlah'],
-                        'keterangan' => $item['keterangan'] ?? ''
+                        'qty' => (int) $item['qty'] // Map jumlah to qty
+                        // Note: keterangan field doesn't exist in detail_pengiriman table
                     ];
                 }
             }
         }
 
-        // Handle file upload
-        $photo = $this->request->getFile('photo');
-        if ($photo && $photo->isValid() && !$photo->hasMoved()) {
-            $newName = $photo->getRandomName();
-            $photo->move(WRITEPATH . '../public/uploads/pengiriman/', $newName);
-            $data['photo'] = $newName;
-        }
+        // Debug logging
+        log_message('debug', 'PengirimanController::store - POST data: ' . json_encode($post));
+        log_message('debug', 'PengirimanController::store - Prepared details: ' . json_encode($details));
 
         // Create shipment
         $result = $this->pengirimanService->createShipment($data, $details);
@@ -448,32 +507,24 @@ class PengirimanController extends BaseController
             'id_pelanggan' => $post['id_pelanggan'] ?? '',
             'id_kurir' => $post['id_kurir'] ?? '',
             'no_po' => $post['no_po'] ?? '',
+            'detail_location' => $post['detail_location'] ?? '',
             'no_kendaraan' => $post['no_kendaraan'] ?? '',
             'status' => (int) ($post['status'] ?? 1),
-            'keterangan' => $post['keterangan'] ?? '',
-            'penerima' => $post['penerima'] ?? ''
+            'keterangan' => $post['keterangan'] ?? ''
         ];
 
         // Prepare details data
         $details = [];
         if (!empty($post['items']) && is_array($post['items'])) {
             foreach ($post['items'] as $item) {
-                if (!empty($item['id_barang']) && !empty($item['jumlah'])) {
+                if (!empty($item['id_barang']) && !empty($item['qty'])) {
                     $details[] = [
                         'id_barang' => $item['id_barang'],
-                        'jumlah' => (int) $item['jumlah'],
-                        'keterangan' => $item['keterangan'] ?? ''
+                        'qty' => (int) $item['qty'] // Map jumlah to qty
+                        // Note: keterangan field doesn't exist in detail_pengiriman table
                     ];
                 }
             }
-        }
-
-        // Handle file upload
-        $photo = $this->request->getFile('photo');
-        if ($photo && $photo->isValid() && !$photo->hasMoved()) {
-            $newName = $photo->getRandomName();
-            $photo->move(WRITEPATH . '../public/uploads/pengiriman/', $newName);
-            $data['photo'] = $newName;
         }
 
         // Update shipment
@@ -584,6 +635,7 @@ class PengirimanController extends BaseController
             'courier' => $pengiriman->nama_kurir ?? 'N/A',
             'vehicle' => $pengiriman->no_kendaraan ?? '',
             'po_number' => $pengiriman->no_po ?? '',
+            'detail_location' => $pengiriman->detail_location ?? '',
             'recipient' => $pengiriman->penerima ?? '',
             'notes' => $pengiriman->keterangan ?? '',
             'items' => $items

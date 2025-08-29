@@ -13,6 +13,7 @@ class PengirimanEntity extends Entity
         'id_kurir' => null,
         'no_kendaraan' => null,
         'no_po' => null,
+        'detail_location' => null,
         'keterangan' => null,
         'penerima' => null,
         'photo' => null,
@@ -34,6 +35,7 @@ class PengirimanEntity extends Entity
         'id_kurir' => 'string',
         'no_kendaraan' => 'string',
         'no_po' => 'string',
+        'detail_location' => '?string',
         'keterangan' => '?string',
         'penerima' => '?string',
         'photo' => '?string',
@@ -261,6 +263,22 @@ class PengirimanEntity extends Entity
     public function getPONumber(): string
     {
         return $this->attributes['no_po'] ?? '';
+    }
+
+    /**
+     * Get detail location
+     */
+    public function getDetailLocation(): string
+    {
+        return $this->attributes['detail_location'] ?? '';
+    }
+
+    /**
+     * Check if detail location exists
+     */
+    public function hasDetailLocation(): bool
+    {
+        return !empty($this->attributes['detail_location']);
     }
 
     /**

@@ -93,6 +93,17 @@
             </div>
             <?php endif; ?>
 
+            <!-- Detail Location -->
+            <div class="detail-card">
+                <div class="detail-icon">
+                    <i class="fas fa-map-marker-alt text-danger"></i>
+                </div>
+                <div class="detail-content">
+                    <label>Detail Location</label>
+                    <span><?= !empty($shipment['detail_location']) ? esc($shipment['detail_location']) : '-' ?></span>
+                </div>
+            </div>
+
             <!-- Recipient -->
             <?php if (!empty($shipment['recipient'])): ?>
             <div class="detail-card">

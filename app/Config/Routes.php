@@ -136,6 +136,8 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->get('pengiriman/duplicate/(:segment)', 'PengirimanController::duplicate/$1');
     $routes->get('pengiriman/export', 'PengirimanController::export');
     $routes->post('pengiriman/generate-code', 'PengirimanController::generateCode');
+    $routes->get('pengiriman/generatePO', 'PengirimanController::generatePO');
+    $routes->post('pengiriman/debug-store', 'PengirimanController::debugStore');
     $routes->get('pengiriman/get-details', 'PengirimanController::getDetails');
     $routes->get('pengiriman/statistics', 'PengirimanController::statistics');
     

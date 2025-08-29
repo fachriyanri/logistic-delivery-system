@@ -193,6 +193,8 @@ class PengirimanService
                 $data['status'] = PengirimanEntity::STATUS_SENT;
             }
 
+            log_message('critical', 'DATA TO BE SAVED: ' . json_encode($data));
+
             // Start transaction
             $this->pengirimanModel->db->transStart();
 
@@ -346,6 +348,63 @@ class PengirimanService
     }
 
     /**
+     * Generate unique PO number
+     * 
+     * Generates a unique Purchase Order number with format: PO{YYYY}{MM}{DD}{XXX}
+     * where XXX is a sequence number that ensures uniqueness by checking the database.
+     * 
+     * @return string Unique PO number
+     * @throws \Exception If unable to generate unique number after maximum attempts
+     */
+    public function generatePONumber(): string
+    {
+        $db = \Config\Database::connect();
+        $maxAttempts = 100;
+        $attempt = 0;
+        
+        do {
+            $attempt++;
+            $now = new \DateTime();
+            $year = $now->format('Y');
+            $month = $now->format('m');
+            $day = $now->format('d');
+            
+            // Use microseconds for better uniqueness
+            $microtime = (int) ($now->format('u') / 1000); // Convert microseconds to milliseconds
+            $sequence = str_pad($microtime % 1000, 3, '0', STR_PAD_LEFT);
+            
+            // If multiple attempts, use attempt number + random
+            if ($attempt > 1) {
+                $random = mt_rand(1, 999);
+                $sequence = str_pad($random, 3, '0', STR_PAD_LEFT);
+            }
+            
+            $poNumber = "PO{$year}{$month}{$day}{$sequence}";
+            
+            // Check if this PO number already exists
+            $query = $db->query("SELECT COUNT(*) as count FROM pengiriman WHERE no_po = ?", [$poNumber]);
+            $exists = $query->getRow()->count > 0;
+            
+            if (!$exists) {
+                log_message('info', "Generated unique PO number: {$poNumber} (attempt {$attempt})");
+                return $poNumber;
+            }
+            
+            // If exists, wait a tiny bit and try again
+            usleep(1000); // 1 millisecond
+            
+        } while ($exists && $attempt < $maxAttempts);
+        
+        // Fallback: use timestamp + random if all attempts failed
+        $timestamp = time();
+        $random = mt_rand(100, 999);
+        $fallbackPO = "PO{$timestamp}{$random}";
+        
+        log_message('warning', "PO generation reached max attempts, using fallback: {$fallbackPO}");
+        return $fallbackPO;
+    }
+
+    /**
      * Get customers for dropdown
      */
     public function getCustomersForSelect(): array
@@ -397,6 +456,14 @@ class PengirimanService
             $errors[] = 'Nomor kendaraan harus diisi';
         }
 
+        // Validate ID uniqueness (only for new records or when ID changes)
+        if (!empty($data['id_pengiriman']) && $data['id_pengiriman'] !== $id) {
+            $existing = $this->pengirimanModel->find($data['id_pengiriman']);
+            if ($existing) {
+                $errors[] = 'ID Pengiriman sudah terdaftar';
+            }
+        }
+
         // Validate date format
         if (!empty($data['tanggal'])) {
             $date = \DateTime::createFromFormat('Y-m-d', $data['tanggal']);
@@ -439,18 +506,25 @@ class PengirimanService
     {
         $errors = [];
 
+        // Debug logging
+        log_message('debug', 'PengirimanService::validateShipmentDetails - Details received: ' . json_encode($details));
+
         if (empty($details)) {
             $errors[] = 'Detail barang harus diisi';
+            log_message('debug', 'PengirimanService::validateShipmentDetails - Details array is empty');
             return $errors;
         }
 
         foreach ($details as $index => $detail) {
+            log_message('debug', "PengirimanService::validateShipmentDetails - Validating detail {$index}: " . json_encode($detail));
             $detailErrors = $this->detailModel->validateDetailData($detail);
             if (!empty($detailErrors)) {
+                log_message('debug', "PengirimanService::validateShipmentDetails - Detail {$index} errors: " . json_encode($detailErrors));
                 $errors[] = "Item " . ($index + 1) . ": " . implode(', ', $detailErrors);
             }
         }
 
+        log_message('debug', 'PengirimanService::validateShipmentDetails - Final errors: ' . json_encode($errors));
         return $errors;
     }
 

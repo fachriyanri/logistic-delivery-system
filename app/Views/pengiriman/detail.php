@@ -173,7 +173,7 @@
                                     <?php 
                                     $totalNilai = 0;
                                     foreach ($detail_pengiriman as $index => $detail): 
-                                        $subtotal = $detail->jumlah * $detail->harga;
+                                        $subtotal = $detail->qty  * $detail->harga;
                                         $totalNilai += $subtotal;
                                     ?>
                                     <tr>
@@ -182,7 +182,7 @@
                                             <strong><?= esc($detail->nama_barang) ?></strong>
                                         </td>
                                         <td><?= esc($detail->nama_kategori) ?></td>
-                                        <td class="text-center"><?= number_format($detail->jumlah) ?></td>
+                                        <td class="text-center"><?= number_format($detail->qty) ?></td>
                                         <td class="text-center"><?= esc($detail->satuan) ?></td>
                                         <td class="text-end">Rp <?= number_format($detail->harga, 0, ',', '.') ?></td>
                                         <td class="text-end">Rp <?= number_format($subtotal, 0, ',', '.') ?></td>

@@ -18,7 +18,7 @@ class DetailPengirimanModel extends Model
         'qty'
     ];
 
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
 
     protected $validationRules = [
         'id_pengiriman' => 'required|max_length[14]',
@@ -49,14 +49,14 @@ class DetailPengirimanModel extends Model
     public function getByShipmentId(string $shipmentId): array
     {
         $builder = $this->db->table($this->table . ' dp');
-        $builder->select("dp.*, b.nama as nama_barang, b.satuan, b.harga, k.nama as nama_kategori, dp.qty as jumlah, '' as keterangan");
+        $builder->select("dp.*, b.nama as nama_barang, b.satuan, b.harga, k.nama as nama_kategori, '' as keterangan");
         $builder->join('barang b', 'b.id_barang = dp.id_barang', 'left');
         $builder->join('kategori k', 'k.id_kategori = b.id_kategori', 'left');
         $builder->where('dp.id_pengiriman', $shipmentId);
         $builder->orderBy('b.nama', 'ASC');
-        
+
         $results = $builder->get()->getResultArray();
-        
+
         // Convert to entities
         $entities = [];
         foreach ($results as $result) {
@@ -72,33 +72,31 @@ class DetailPengirimanModel extends Model
      */
     public function saveShipmentDetails(string $shipmentId, array $details): bool
     {
-        // Start transaction
-        $this->db->transStart();
+        log_message('critical', 'Detail Shipment Data: ' . json_encode($details, JSON_PRETTY_PRINT));
+        // Hapus detail lama terlebih dahulu.
+        // Ini penting untuk mode "update" agar item yang dihapus di form juga hilang dari DB.
+        $this->where('id_pengiriman', $shipmentId)->delete();
 
-        try {
-            // Delete existing details
-            $this->where('id_pengiriman', $shipmentId)->delete();
-
-            // Insert new details
-            foreach ($details as $detail) {
-                $data = [
-                    'id_pengiriman' => $shipmentId,
-                    'id_barang' => $detail['id_barang'],
-                    'qty' => (int) $detail['qty']
-                ];
-
-                if (!$this->insert($data)) {
-                    throw new \Exception('Failed to insert detail');
-                }
-            }
-
-            $this->db->transComplete();
-            return $this->db->transStatus();
-
-        } catch (\Exception $e) {
-            $this->db->transRollback();
-            return false;
+        // Jika tidak ada detail baru untuk dimasukkan, proses selesai dan berhasil.
+        if (empty($details)) {
+            return true;
         }
+
+        // Siapkan data untuk batch insert.
+        $batchData = [];
+        foreach ($details as $detail) {
+            $batchData[] = [
+                'id_pengiriman' => $shipmentId,
+                'id_barang'     => $detail['id_barang'],
+                'qty'           => (int) $detail['qty']
+            ];
+        }
+
+        // Lakukan insert semua data sekaligus.
+        $result = $this->insertBatch($batchData);
+
+        // Mengembalikan true jika ada baris yang berhasil dimasukkan, false jika gagal.
+        return $result !== false;
     }
 
     /**
@@ -115,10 +113,10 @@ class DetailPengirimanModel extends Model
     public function getTotalQuantity(string $shipmentId): int
     {
         $result = $this->selectSum('qty')
-                      ->where('id_pengiriman', $shipmentId)
-                      ->get()
-                      ->getRow();
-        
+            ->where('id_pengiriman', $shipmentId)
+            ->get()
+            ->getRow();
+
         return (int) ($result->qty ?? 0);
     }
 
@@ -144,7 +142,7 @@ class DetailPengirimanModel extends Model
     public function getShipmentSummary(string $shipmentId): array
     {
         $details = $this->getByShipmentId($shipmentId);
-        
+
         $summary = [
             'total_items' => count($details),
             'total_quantity' => 0,

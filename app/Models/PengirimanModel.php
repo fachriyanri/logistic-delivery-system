@@ -19,6 +19,7 @@ class PengirimanModel extends Model
         'id_kurir',
         'no_kendaraan',
         'no_po',
+        'detail_location',
         'keterangan',
         'penerima',
         'photo',
@@ -28,7 +29,7 @@ class PengirimanModel extends Model
     protected $useTimestamps = false;
 
     protected $validationRules = [
-        'id_pengiriman' => 'required|max_length[14]|is_unique[pengiriman.id_pengiriman,id_pengiriman,{id_pengiriman}]',
+        'id_pengiriman' => 'required|max_length[14]',
         'tanggal' => 'required|valid_date',
         'id_pelanggan' => 'required|is_not_unique[pelanggan.id_pelanggan]',
         'id_kurir' => 'required|is_not_unique[kurir.id_kurir]',
