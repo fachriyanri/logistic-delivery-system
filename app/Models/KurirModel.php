@@ -241,7 +241,15 @@ class KurirModel extends Model
             $builder->where('id_kurir !=', $excludeId);
         }
         
-        return $builder->countAllResults() > 0;
+        // Debug logging
+        $query = $builder->getCompiledSelect(false);
+        log_message('debug', "KurirModel::isPhoneExists - Query: {$query}");
+        log_message('debug', "KurirModel::isPhoneExists - Phone: {$phone}, ExcludeId: {$excludeId}");
+        
+        $count = $builder->countAllResults();
+        log_message('debug', "KurirModel::isPhoneExists - Count: {$count}");
+        
+        return $count > 0;
     }
 
     /**

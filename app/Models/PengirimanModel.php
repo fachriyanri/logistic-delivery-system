@@ -23,10 +23,14 @@ class PengirimanModel extends Model
         'keterangan',
         'penerima',
         'photo',
-        'status'
+        'status',
+        'created_at',
+        'updated_at'
     ];
 
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
+    protected $createdField = 'created_at';
+    protected $updatedField = 'updated_at';
 
     protected $validationRules = [
         'id_pengiriman' => 'required|max_length[14]',
@@ -185,11 +189,27 @@ class PengirimanModel extends Model
      */
     public function savePengiriman(array $data, string $id = ''): bool
     {
+        // Ensure timestamps are set
+        $currentTime = date('Y-m-d H:i:s');
+        
         if (empty($id)) {
-            // Insert new shipment
+            // Insert new shipment - set both created_at and updated_at
+            if (!isset($data['created_at'])) {
+                $data['created_at'] = $currentTime;
+            }
+            if (!isset($data['updated_at'])) {
+                $data['updated_at'] = $currentTime;
+            }
+            
+            log_message('debug', 'PengirimanModel::savePengiriman - Insert data with timestamps: ' . json_encode($data));
             return $this->insert($data) !== false;
         } else {
-            // Update existing shipment
+            // Update existing shipment - only set updated_at
+            if (!isset($data['updated_at'])) {
+                $data['updated_at'] = $currentTime;
+            }
+            
+            log_message('debug', 'PengirimanModel::savePengiriman - Update data with timestamps: ' . json_encode($data));
             return $this->update($id, $data);
         }
     }

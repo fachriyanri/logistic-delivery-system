@@ -190,7 +190,7 @@ class PengirimanService
 
             // Set default status if not provided
             if (empty($data['status'])) {
-                $data['status'] = PengirimanEntity::STATUS_SENT;
+                $data['status'] = PengirimanEntity::STATUS_PENDING;
             }
 
             log_message('critical', 'DATA TO BE SAVED: ' . json_encode($data));
@@ -487,10 +487,9 @@ class PengirimanService
         }
 
         // Validate status requirements
-        if (!empty($data['status']) && $data['status'] != PengirimanEntity::STATUS_SENT) {
-            if (empty($data['penerima'])) {
-                $errors[] = 'Nama penerima harus diisi untuk status ini';
-            }
+        // Note: penerima field has been removed from forms as per user request
+        // Only keterangan is required for non-pending statuses
+        if (!empty($data['status']) && $data['status'] != PengirimanEntity::STATUS_PENDING) {
             if (empty($data['keterangan'])) {
                 $errors[] = 'Keterangan harus diisi untuk status ini';
             }

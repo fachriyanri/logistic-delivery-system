@@ -89,7 +89,6 @@ class PelangganController extends BaseController
         }
 
         $id = $post['id'] ?? '';
-        $action = $post['action'] ?? 'save';
 
         // Prepare data
         $data = [
@@ -118,13 +117,7 @@ class PelangganController extends BaseController
 
         if ($result['success']) {
             session()->setFlashdata('success', $result['message']);
-            
-            if ($action === 'save') {
-                $redirectId = $result['data']->id_pelanggan ?? $id;
-                return redirect()->to('/pelanggan/manage/' . $redirectId);
-            } else {
-                return redirect()->to('/pelanggan');
-            }
+            return redirect()->to('/pelanggan');
         } else {
             session()->setFlashdata('error', $result['message']);
             return redirect()->to('/pelanggan/manage/' . $id)->withInput();

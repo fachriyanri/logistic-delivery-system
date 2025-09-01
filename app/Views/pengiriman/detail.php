@@ -287,12 +287,6 @@
                            class="btn btn-info btn-sm">
                             <i class="fas fa-route"></i> Tracking Pengiriman
                         </a>
-                        <?php if (session('level') == 1 || session('level') == 3): ?>
-                        <a href="<?= base_url('pengiriman/duplicate/' . $pengiriman->id_pengiriman) ?>" 
-                           class="btn btn-warning btn-sm">
-                            <i class="fas fa-copy"></i> Duplikasi Pengiriman
-                        </a>
-                        <?php endif; ?>
                         <?php if (session('level') == 1): ?>
                         <button type="button" class="btn btn-danger btn-sm" 
                                 onclick="confirmDelete('<?= $pengiriman->id_pengiriman ?>')">

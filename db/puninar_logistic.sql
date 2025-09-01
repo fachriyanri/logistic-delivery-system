@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 28, 2025 at 01:48 PM
+-- Generation Time: Sep 01, 2025 at 06:04 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -44,9 +44,10 @@ CREATE TABLE `barang` (
 INSERT INTO `barang` (`id_barang`, `nama`, `satuan`, `id_kategori`, `created_at`, `updated_at`, `harga`) VALUES
 ('BRG0001', 'BRAKE SHOE HONDA ASP', 'SATUAN 1', 'KTG01', '2025-08-18 05:01:13', '2025-08-18 05:01:13', 10000.00),
 ('BRG0002', 'BRAKE SHOE KHARISMA', 'SATUAN 1', 'KTG02', '2025-08-18 05:01:13', '2025-08-18 05:01:13', 20000.00),
-('BRG0003', 'BRAKE SHOE SUPRA FIT', 'BOX', 'KTG02', '2025-08-18 05:01:13', '2025-08-18 05:01:13', 0.00),
+('BRG0003', 'BRAKE SHOE SUPRA FIT', 'BOX', 'KTG02', '2025-08-18 05:01:13', '2025-08-18 05:01:13', 100000.00),
 ('BRG0004', 'SHOCKBREAKER KYT', 'BOX', 'KTG01', NULL, NULL, 1000000.00),
-('BRG0005', 'SHOCK BREAKER KYT VENOM', 'BOX', 'KTG02', NULL, NULL, 1500000.00);
+('BRG0005', 'SHOCK BREAKER KYT VENOM', 'BOX', 'KTG02', NULL, NULL, 1500000.00),
+('BRG0006', 'CSF OE Style Radiator E36 BMW', 'BOX', 'KTG04', NULL, NULL, 3500000.00);
 
 -- --------------------------------------------------------
 
@@ -72,9 +73,10 @@ INSERT INTO `detail_pengiriman` (`id_detail`, `id_pengiriman`, `id_barang`, `qty
 (2, 'KRM20160820001', 'BRG0002', 3, '2025-08-18 05:01:14', '2025-08-18 05:01:14'),
 (3, 'KRM20250827001', 'BRG0005', 2, '2025-08-27 00:46:57', '2025-08-27 00:46:57'),
 (4, 'KRM20250827002', 'BRG0004', 2, '2025-08-27 00:56:00', '2025-08-27 00:56:00'),
-(12, 'KRM20250828001', 'BRG0001', 2, '2025-08-28 00:26:02', '2025-08-28 00:26:02'),
-(13, 'KRM20250828001', 'BRG0003', 1, '2025-08-28 00:26:02', '2025-08-28 00:26:02'),
-(14, 'KRM20250828001', 'BRG0001', 1, '2025-08-28 00:26:02', '2025-08-28 00:26:02');
+(21, 'KRM20250829001', 'BRG0001', 2, '2025-08-29 19:57:09', '2025-08-29 19:57:09'),
+(22, 'KRM20250829001', 'BRG0004', 1, '2025-08-29 19:57:09', '2025-08-29 19:57:09'),
+(24, 'KRM20250828001', 'BRG0001', 4, '2025-09-01 12:57:05', '2025-09-01 12:57:05'),
+(25, 'KRM20250901001', 'BRG0006', 3, '2025-09-01 13:03:51', '2025-09-01 13:03:51');
 
 -- --------------------------------------------------------
 
@@ -122,11 +124,12 @@ CREATE TABLE `kurir` (
 --
 
 INSERT INTO `kurir` (`id_kurir`, `nama`, `jenis_kelamin`, `telepon`, `alamat`, `created_at`, `updated_at`) VALUES
-('KRR01', 'EKO', 'Laki-Laki', '081385195955', 'TANGERANG', '2025-08-18 05:01:14', '2025-08-18 05:01:14'),
+('KRR01', 'EKO', 'Laki-Laki', '081385195955', 'TANGERANG SELATAN', '2025-08-18 05:01:14', '2025-09-01 12:48:42'),
 ('KRR02', 'ERIK', 'Laki-Laki', '081284959589', 'TANGERANG', '2025-08-18 05:01:14', '2025-08-18 05:01:14'),
 ('KRR03', 'TRIBUDI', 'Laki-Laki', '081219900381', 'TANGERANG', '2025-08-18 05:01:14', '2025-08-18 05:01:14'),
 ('KRR04', 'EKI', 'Laki-Laki', '081385195955', 'TANGERANG', '2025-08-18 05:01:14', '2025-08-18 05:01:14'),
-('KRR05', 'AHMAD RIZAL', 'Laki-Laki', '081930100123', 'JAKARTA UTARA', '2025-08-25 23:49:58', '2025-08-25 23:50:13');
+('KRR05', 'AHMAD RIZAL', 'Laki-Laki', '081930100123', 'JAKARTA UTARA', '2025-08-25 23:49:58', '2025-08-25 23:50:13'),
+('KRR06', 'TINA', 'Perempuan', '081385195954', 'BEKASI', '2025-09-01 12:49:47', '2025-09-01 12:49:47');
 
 -- --------------------------------------------------------
 
@@ -184,7 +187,8 @@ INSERT INTO `pelanggan` (`id_pelanggan`, `nama`, `telepon`, `alamat`, `created_a
 ('CST0001', 'ASTRA OTOPART', '021-4603550', 'Jl. Raya Pegangsaan Dua Km 2.2, Kelapa Gading, Jakarta Utara, Indonesia 14250', '2025-08-18 05:01:13', '2025-08-18 05:01:13'),
 ('CST0002', 'Idemitsu Lube Indonesia', '021-8911 4611', 'JL Permata Raya, Kawasan Industri KIIC, Lot BB/4A, Karawang, Jawa Barat,', '2025-08-18 05:01:13', '2025-08-18 05:01:13'),
 ('CST0003', 'Federal Karyatama', '021-4613583', 'Jl. Pulobuaran Raya, RW.9, Jatinegara, Cakung, Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta 13910', '2025-08-18 05:01:13', '2025-08-18 05:01:13'),
-('CST0004', 'BMW ASTRA CILANDAK', '0217500335', 'Jl. R.A. Kartini No.Kav. 203, RT.11/RW.4, Cilandak Bar., Kec. Cilandak, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12430', NULL, NULL);
+('CST0004', 'BMW ASTRA CILANDAK', '0217500335', 'Jl. R.A. Kartini No.Kav. 203, RT.11/RW.4, Cilandak Bar., Kec. Cilandak, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12430', NULL, NULL),
+('CST0005', 'PT BYD MOTOR INDONESIA', '0219089011', 'Autograph Tower Thamrin Nine, level 50th, Jl. M.H. Thamrin No.10, Kb. Melati, Kecamatan Tanah Abang, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -216,7 +220,9 @@ INSERT INTO `pengiriman` (`id_pengiriman`, `tanggal`, `id_pelanggan`, `id_kurir`
 ('KRM20160820001', '2016-08-20', 'CST0001', 'KRR05', 'B021ZIG', '8732984732984', NULL, 'barang pecah belah', 'REZA', NULL, 1, '2025-08-18 05:01:14', '2025-08-18 05:01:14'),
 ('KRM20250827001', '2025-08-27', 'CST0001', 'KRR03', 'B098921', 'PO20250827581', NULL, '', NULL, NULL, 1, NULL, NULL),
 ('KRM20250827002', '2025-08-27', 'CST0003', 'KRR03', 'B092181', 'PO20250827011', 'kalibata', '', NULL, NULL, 1, NULL, NULL),
-('KRM20250828001', '2025-08-28', 'CST0002', 'KRR04', 'B4900QD', 'PO20250828301', NULL, '', NULL, NULL, 1, NULL, NULL);
+('KRM20250828001', '2025-08-28', 'CST0002', 'KRR04', 'B4900QD', 'PO20250828301', '', '', NULL, NULL, 1, NULL, NULL),
+('KRM20250829001', '2025-08-29', 'CST0004', 'KRR05', 'B599SBY', 'PO20250829978', '', 'AFTERMARKET', NULL, NULL, 2, NULL, NULL),
+('KRM20250901001', '2025-09-01', 'CST0004', 'KRR02', 'B40910QF', 'PO20250901612', NULL, '', NULL, NULL, 1, '2025-09-01 13:03:51', '2025-09-01 13:03:51');
 
 -- --------------------------------------------------------
 
@@ -277,7 +283,8 @@ INSERT INTO `user` (`id_user`, `username`, `password`, `level`, `created_at`, `u
 ('USR02', 'financepuninar', '$argon2id$v=19$m=65536,t=4,p=1$cUVmU2dKaWM1QW51WS9sdA$PSaSauMee7xMPaOjhM7R37c6aEnQw2F9QLpgMUxXrvA', 2, '2025-08-18 12:37:34', '2025-08-25 16:00:35', 1),
 ('USR03', 'gudangpuninar', '$argon2id$v=19$m=65536,t=4,p=1$QmF2ODVWLkM3RllEbGFJLw$jaIdYexnUz1/mcZFV7thmwDDYwOwWDbXsrrupW4sfiM', 3, '2025-08-18 12:37:34', '2025-08-18 12:37:34', 1),
 ('USR04', 'ahmadkamil', '$argon2id$v=19$m=65536,t=4,p=1$c0Z4dTZyUlBxUUFSWFplaA$O7KIZ1JX3n6p8sfyvOrvrnGvF+OTFU9T41qkGs/uDrY', 2, '2025-08-25 23:47:31', '2025-08-25 23:47:31', 1),
-('USR05', 'ahmadrizal', '$argon2id$v=19$m=65536,t=4,p=1$UkZTZXB2eFFJNkV6YjVXRA$Jjv5VJ0Q4KIZMesGY3JElskCWs1Dwgf0+LYzJ6seBDs', 2, '2025-08-25 23:49:58', '2025-08-25 23:49:58', 1);
+('USR05', 'ahmadrizal', '$argon2id$v=19$m=65536,t=4,p=1$UkZTZXB2eFFJNkV6YjVXRA$Jjv5VJ0Q4KIZMesGY3JElskCWs1Dwgf0+LYzJ6seBDs', 2, '2025-08-25 23:49:58', '2025-08-25 23:49:58', 1),
+('USR06', 'tina', '$argon2id$v=19$m=65536,t=4,p=1$MHJ1bFhTZy52L1hDdHZobw$+HdvYXlCY07asAOIAhnGO4r7b5+cIlajHp3ROi2C8fw', 2, '2025-09-01 12:49:47', '2025-09-01 12:49:47', 1);
 
 --
 -- Indexes for dumped tables
@@ -362,7 +369,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `detail_pengiriman`
 --
 ALTER TABLE `detail_pengiriman`
-  MODIFY `id_detail` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id_detail` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `migrations`

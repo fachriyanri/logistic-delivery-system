@@ -133,7 +133,6 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->get('pengiriman/delivery-note/(:segment)', 'PengirimanController::deliveryNote/$1');
     $routes->post('pengiriman/update-status/(:segment)', 'PengirimanController::updateStatus/$1');
     $routes->get('pengiriman/track/(:segment)', 'PengirimanController::track/$1');
-    $routes->get('pengiriman/duplicate/(:segment)', 'PengirimanController::duplicate/$1');
     $routes->get('pengiriman/export', 'PengirimanController::export');
     $routes->post('pengiriman/generate-code', 'PengirimanController::generateCode');
     $routes->get('pengiriman/generatePO', 'PengirimanController::generatePO');

@@ -18,6 +18,8 @@ class PengirimanEntity extends Entity
         'penerima' => null,
         'photo' => null,
         'status' => null,
+        'created_at' => null,
+        'updated_at' => null,
         // Virtual fields from joins
         'nama_pelanggan' => null,
         'alamat_pelanggan' => null,
@@ -40,6 +42,8 @@ class PengirimanEntity extends Entity
         'penerima' => '?string',
         'photo' => '?string',
         'status' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
         'pelanggan_nama' => '?string',
         'pelanggan_alamat' => '?string',
         'kurir_nama' => '?string',
@@ -47,11 +51,17 @@ class PengirimanEntity extends Entity
 
     protected $datamap = [];
 
-    // Status constants
-    const STATUS_SENT = 1;
-    const STATUS_RECEIVED = 2;
-    const STATUS_REJECTED = 3;
-    const STATUS_PARTIAL = 4;
+    // Status constants - aligned with form values
+    const STATUS_PENDING = 1;       // Pending
+    const STATUS_IN_TRANSIT = 2;    // Dalam Perjalanan
+    const STATUS_DELIVERED = 3;     // Terkirim
+    const STATUS_CANCELLED = 4;     // Dibatalkan
+    
+    // Legacy constants for backward compatibility
+    const STATUS_SENT = 1;          // @deprecated Use STATUS_PENDING
+    const STATUS_RECEIVED = 3;      // @deprecated Use STATUS_DELIVERED
+    const STATUS_REJECTED = 4;      // @deprecated Use STATUS_CANCELLED
+    const STATUS_PARTIAL = 2;       // @deprecated Use STATUS_IN_TRANSIT
 
     /**
      * Get status text
@@ -59,10 +69,10 @@ class PengirimanEntity extends Entity
     public function getStatusText(): string
     {
         $statuses = [
-            self::STATUS_SENT => 'Dikirim',
-            self::STATUS_RECEIVED => 'Diterima',
-            self::STATUS_REJECTED => 'Ditolak',
-            self::STATUS_PARTIAL => 'Diterima Sebagian'
+            self::STATUS_PENDING => 'Pending',
+            self::STATUS_IN_TRANSIT => 'Dalam Perjalanan',
+            self::STATUS_DELIVERED => 'Terkirim',
+            self::STATUS_CANCELLED => 'Dibatalkan'
         ];
 
         return $statuses[$this->attributes['status']] ?? 'Unknown';
@@ -74,10 +84,10 @@ class PengirimanEntity extends Entity
     public function getStatusBadgeClass(): string
     {
         $classes = [
-            self::STATUS_SENT => 'bg-warning',
-            self::STATUS_RECEIVED => 'bg-success',
-            self::STATUS_REJECTED => 'bg-danger',
-            self::STATUS_PARTIAL => 'bg-info'
+            self::STATUS_PENDING => 'bg-warning',
+            self::STATUS_IN_TRANSIT => 'bg-info',
+            self::STATUS_DELIVERED => 'bg-success',
+            self::STATUS_CANCELLED => 'bg-danger'
         ];
 
         return $classes[$this->attributes['status']] ?? 'bg-secondary';
@@ -88,7 +98,7 @@ class PengirimanEntity extends Entity
      */
     public function isDelivered(): bool
     {
-        return in_array($this->attributes['status'], [self::STATUS_RECEIVED, self::STATUS_PARTIAL]);
+        return $this->attributes['status'] === self::STATUS_DELIVERED;
     }
 
     /**
@@ -96,15 +106,31 @@ class PengirimanEntity extends Entity
      */
     public function isPending(): bool
     {
-        return $this->attributes['status'] === self::STATUS_SENT;
+        return $this->attributes['status'] === self::STATUS_PENDING;
     }
 
     /**
-     * Check if shipment is rejected
+     * Check if shipment is in transit
+     */
+    public function isInTransit(): bool
+    {
+        return $this->attributes['status'] === self::STATUS_IN_TRANSIT;
+    }
+
+    /**
+     * Check if shipment is cancelled/rejected
+     */
+    public function isCancelled(): bool
+    {
+        return $this->attributes['status'] === self::STATUS_CANCELLED;
+    }
+
+    /**
+     * Check if shipment is rejected (legacy)
      */
     public function isRejected(): bool
     {
-        return $this->attributes['status'] === self::STATUS_REJECTED;
+        return $this->isCancelled();
     }
 
     /**
@@ -287,18 +313,20 @@ class PengirimanEntity extends Entity
     public static function getStatusOptions(): array
     {
         return [
-            self::STATUS_SENT => 'Dikirim',
-            self::STATUS_RECEIVED => 'Diterima',
-            self::STATUS_REJECTED => 'Ditolak',
-            self::STATUS_PARTIAL => 'Diterima Sebagian'
+            self::STATUS_PENDING => 'Pending',
+            self::STATUS_IN_TRANSIT => 'Dalam Perjalanan',
+            self::STATUS_DELIVERED => 'Terkirim',
+            self::STATUS_CANCELLED => 'Dibatalkan'
         ];
     }
 
     /**
      * Check if status requires receiver information
+     * Note: Penerima field has been removed from forms, so this returns false
      */
     public function statusRequiresReceiver(): bool
     {
-        return in_array($this->attributes['status'], [self::STATUS_RECEIVED, self::STATUS_REJECTED, self::STATUS_PARTIAL]);
+        // Penerima field is no longer used in the system
+        return false;
     }
 }

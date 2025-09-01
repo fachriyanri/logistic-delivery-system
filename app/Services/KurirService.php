@@ -281,9 +281,20 @@ class KurirService
             unset($data['id_kurir']); // Remove again for update
 
             // Check if phone number already exists (excluding current record)
-            if (isset($data['telepon']) && $this->kurirModel->isPhoneExists($data['telepon'], $id)) {
-                $result['message'] = 'Nomor telepon sudah terdaftar';
-                return $result;
+            if (isset($data['telepon'])) {
+                // Debug logging
+                log_message('debug', "KurirService::updateCourier - Checking phone: {$data['telepon']} for courier ID: {$id}");
+                
+                // Only check if phone number has changed
+                if ($data['telepon'] !== $existingCourier->telepon) {
+                    if ($this->kurirModel->isPhoneExists($data['telepon'], $id)) {
+                        log_message('debug', "KurirService::updateCourier - Phone {$data['telepon']} already exists for another courier");
+                        $result['message'] = 'Nomor telepon sudah terdaftar';
+                        return $result;
+                    }
+                } else {
+                    log_message('debug', "KurirService::updateCourier - Phone number unchanged, skipping duplicate check");
+                }
             }
 
             // Prepare kurir data (remove username and password - we don't update user table for edit)

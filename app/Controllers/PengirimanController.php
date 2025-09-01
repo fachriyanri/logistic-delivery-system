@@ -495,11 +495,15 @@ class PengirimanController extends BaseController
     public function update(?string $id = null): ResponseInterface
     {
         if (empty($id)) {
+            log_message('error', 'PengirimanController::update - Empty shipment ID provided');
             session()->setFlashdata('error', 'ID pengiriman tidak valid');
             return redirect()->to('/pengiriman');
         }
 
+        log_message('info', "PengirimanController::update - Starting update for shipment ID: {$id}");
+        
         $post = $this->request->getPost();
+        log_message('debug', 'PengirimanController::update - POST data received: ' . json_encode($post));
         
         // Prepare shipment data
         $data = [
@@ -511,29 +515,40 @@ class PengirimanController extends BaseController
             'no_kendaraan' => $post['no_kendaraan'] ?? '',
             'status' => (int) ($post['status'] ?? 1),
             'keterangan' => $post['keterangan'] ?? ''
+            // Note: penerima field removed as per user request
         ];
+        
+        log_message('debug', 'PengirimanController::update - Prepared shipment data: ' . json_encode($data));
 
         // Prepare details data
         $details = [];
         if (!empty($post['items']) && is_array($post['items'])) {
-            foreach ($post['items'] as $item) {
+            foreach ($post['items'] as $index => $item) {
                 if (!empty($item['id_barang']) && !empty($item['qty'])) {
                     $details[] = [
                         'id_barang' => $item['id_barang'],
                         'qty' => (int) $item['qty'] // Map jumlah to qty
                         // Note: keterangan field doesn't exist in detail_pengiriman table
                     ];
+                    log_message('debug', "PengirimanController::update - Added detail item {$index}: barang={$item['id_barang']}, qty={$item['qty']}");
                 }
             }
         }
+        
+        log_message('debug', 'PengirimanController::update - Prepared details: ' . json_encode($details));
 
         // Update shipment
+        log_message('info', "PengirimanController::update - Calling service to update shipment {$id}");
         $result = $this->pengirimanService->updateShipment($id, $data, $details);
+        
+        log_message('info', 'PengirimanController::update - Service result: ' . json_encode($result));
 
         if ($result['success']) {
+            log_message('info', "PengirimanController::update - Successfully updated shipment {$id}");
             session()->setFlashdata('success', $result['message']);
             return redirect()->to('/pengiriman/detail/' . $id);
         } else {
+            log_message('error', "PengirimanController::update - Failed to update shipment {$id}: {$result['message']}");
             session()->setFlashdata('error', $result['message']);
             return redirect()->to('/pengiriman/edit/' . $id)->withInput();
         }
@@ -647,42 +662,6 @@ class PengirimanController extends BaseController
         ];
 
         return view('mobile/track_shipment', $data);
-    }
-
-    /**
-     * Duplicate shipment
-     */
-    public function duplicate(?string $id = null): string
-    {
-        if (empty($id)) {
-            session()->setFlashdata('error', 'ID pengiriman tidak valid');
-            return redirect()->to('/pengiriman');
-        }
-
-        $pengiriman = $this->pengirimanService->getShipmentById($id);
-        if (!$pengiriman) {
-            session()->setFlashdata('error', 'Pengiriman tidak ditemukan');
-            return redirect()->to('/pengiriman');
-        }
-
-        $details = $this->pengirimanService->getShipmentDetails($id);
-
-        // Reset some fields for duplication
-        $pengiriman->id_pengiriman = $this->pengirimanService->generateNextId();
-        $pengiriman->tanggal = date('Y-m-d');
-        $pengiriman->status = 1;
-        $pengiriman->photo = null;
-
-        $data = [
-            'title' => 'Duplikasi Pengiriman',
-            'pengiriman' => $pengiriman,
-            'detail_pengiriman' => $details,
-            'pelanggan' => $this->pengirimanService->getCustomersForSelect(),
-            'kurir' => $this->pengirimanService->getCouriersForSelect(),
-            'barang' => $this->pengirimanService->getItemsForSelect()
-        ];
-
-        return view('pengiriman/manage', $data);
     }
 
     /**

@@ -108,11 +108,8 @@
                     <div class="card-footer">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <button type="submit" name="action" value="save" class="btn btn-primary">
+                                <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-save"></i> Simpan
-                                </button>
-                                <button type="submit" name="action" value="save_and_close" class="btn btn-success">
-                                    <i class="fas fa-save"></i> Simpan & Tutup
                                 </button>
                             </div>
                             <a href="<?= base_url('pelanggan') ?>" class="btn btn-secondary">

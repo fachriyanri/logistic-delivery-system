@@ -115,12 +115,14 @@
                                     <input type="text" class="form-control <?= isset($validation) && $validation->hasError('no_po') ? 'is-invalid' : '' ?>"
                                         id="no_po" name="no_po"
                                         value="<?= old('no_po', $pengiriman->no_po ?? $autoPO ?? '') ?>"
-                                        placeholder="Nomor Purchase Order" <?= isset($pengiriman) ? '' : 'readonly' ?> required>
+                                        placeholder="Nomor Purchase Order" <?= isset($pengiriman) ? 'readonly' : 'readonly' ?> required>
                                     <?php if (isset($validation) && $validation->hasError('no_po')): ?>
                                         <div class="invalid-feedback"><?= $validation->getError('no_po') ?></div>
                                     <?php endif; ?>
                                     <?php if (!isset($pengiriman)): ?>
                                         <div class="form-text">No PO akan dibuat otomatis</div>
+                                    <?php else: ?>
+                                        <div class="form-text">No PO tidak dapat diubah saat mengedit pengiriman</div>
                                     <?php endif; ?>
                                 </div>
                             </div>
