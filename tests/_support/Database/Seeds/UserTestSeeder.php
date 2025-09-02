@@ -19,7 +19,7 @@ class UserTestSeeder extends Seeder
             ],
             [
                 'id_user' => 'USR02',
-                'username' => 'testfinance',
+                'username' => 'testkurir',
                 'password' => password_hash('testpass123', PASSWORD_ARGON2ID),
                 'level' => 2,
                 'created_at' => date('Y-m-d H:i:s'),

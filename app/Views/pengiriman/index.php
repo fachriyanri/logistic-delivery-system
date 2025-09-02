@@ -147,7 +147,7 @@
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         
-                                        <?php if (session('level') == 1 || session('level') == 3): ?>
+                                        <?php if (session('level') == 1 || session('level') == 2 || session('level') == 3): ?>
                                         <a href="<?= base_url('pengiriman/edit/' . $item->id_pengiriman) ?>" 
                                            class="btn btn-sm btn-warning" title="Edit">
                                             <i class="fas fa-edit"></i>

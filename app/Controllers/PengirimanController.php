@@ -505,32 +505,46 @@ class PengirimanController extends BaseController
         $post = $this->request->getPost();
         log_message('debug', 'PengirimanController::update - POST data received: ' . json_encode($post));
         
-        // Prepare shipment data
-        $data = [
-            'tanggal' => $post['tanggal'] ?? '',
-            'id_pelanggan' => $post['id_pelanggan'] ?? '',
-            'id_kurir' => $post['id_kurir'] ?? '',
-            'no_po' => $post['no_po'] ?? '',
-            'detail_location' => $post['detail_location'] ?? '',
-            'no_kendaraan' => $post['no_kendaraan'] ?? '',
-            'status' => (int) ($post['status'] ?? 1),
-            'keterangan' => $post['keterangan'] ?? ''
-            // Note: penerima field removed as per user request
-        ];
+        // Check user level and restrict data accordingly
+        $userLevel = session('level');
+        log_message('debug', 'PengirimanController::update - User Level: ' . $userLevel);
         
-        log_message('debug', 'PengirimanController::update - Prepared shipment data: ' . json_encode($data));
-
-        // Prepare details data
-        $details = [];
-        if (!empty($post['items']) && is_array($post['items'])) {
-            foreach ($post['items'] as $index => $item) {
-                if (!empty($item['id_barang']) && !empty($item['qty'])) {
-                    $details[] = [
-                        'id_barang' => $item['id_barang'],
-                        'qty' => (int) $item['qty'] // Map jumlah to qty
-                        // Note: keterangan field doesn't exist in detail_pengiriman table
-                    ];
-                    log_message('debug', "PengirimanController::update - Added detail item {$index}: barang={$item['id_barang']}, qty={$item['qty']}");
+        if ($userLevel == 2) {
+            // Level 2 (Kurir) can only update status and detail_location
+            $data = [
+                'status' => (int) ($post['status'] ?? 1),
+                'detail_location' => $post['detail_location'] ?? ''
+            ];
+            
+            // Don't allow details update for couriers
+            $details = [];
+            
+            log_message('debug', 'PengirimanController::update - Courier restricted update: ' . json_encode($data));
+            log_message('debug', 'PengirimanController::update - Session level check: ' . session('level') . ' == 2');
+        } else {
+            // Admin/Gudang can update all fields
+            $data = [
+                'tanggal' => $post['tanggal'] ?? '',
+                'id_pelanggan' => $post['id_pelanggan'] ?? '',
+                'id_kurir' => $post['id_kurir'] ?? '',
+                'no_po' => $post['no_po'] ?? '',
+                'detail_location' => $post['detail_location'] ?? '',
+                'no_kendaraan' => $post['no_kendaraan'] ?? '',
+                'status' => (int) ($post['status'] ?? 1),
+                'keterangan' => $post['keterangan'] ?? ''
+            ];
+            
+            // Prepare details data for non-courier users
+            $details = [];
+            if (!empty($post['items']) && is_array($post['items'])) {
+                foreach ($post['items'] as $index => $item) {
+                    if (!empty($item['id_barang']) && !empty($item['qty'])) {
+                        $details[] = [
+                            'id_barang' => $item['id_barang'],
+                            'qty' => (int) $item['qty']
+                        ];
+                        log_message('debug', "PengirimanController::update - Added detail item {$index}: barang={$item['id_barang']}, qty={$item['qty']}");
+                    }
                 }
             }
         }
@@ -539,6 +553,8 @@ class PengirimanController extends BaseController
 
         // Update shipment
         log_message('info', "PengirimanController::update - Calling service to update shipment {$id}");
+        log_message('debug', 'PengirimanController::update - Final data to service: ' . json_encode($data));
+        log_message('debug', 'PengirimanController::update - User level to service: ' . $userLevel);
         $result = $this->pengirimanService->updateShipment($id, $data, $details);
         
         log_message('info', 'PengirimanController::update - Service result: ' . json_encode($result));

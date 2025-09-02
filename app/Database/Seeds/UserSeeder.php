@@ -19,9 +19,9 @@ class UserSeeder extends Seeder
             ],
             [
                 'id_user'    => 'USR02',
-                'username'   => 'financepuninar',
-                'password'   => password_hash('FinancePuninar123', PASSWORD_ARGON2ID),
-                'level'      => USER_LEVEL_FINANCE,
+                'username'   => 'kurirpuninar',
+                'password'   => password_hash('KurirPuninar123', PASSWORD_ARGON2ID),
+                'level'      => USER_LEVEL_COURIER,
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ],

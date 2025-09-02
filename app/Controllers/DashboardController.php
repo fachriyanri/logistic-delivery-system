@@ -36,7 +36,7 @@ class DashboardController extends BaseController
             return redirect()->to('/login')->with('error', 'Sesi Anda tidak valid. Silakan login kembali.');
         } 
         // Get role name for display
-        $roleNames = [1 => 'Admin', 2 => 'Finance', 3 => 'Gudang'];
+        $roleNames = [1 => 'Admin', 2 => 'Kurir', 3 => 'Gudang'];
         $roleName = $roleNames[$userLevel] ?? 'User';
         
         // Set role_name in session for view
@@ -64,23 +64,54 @@ class DashboardController extends BaseController
     private function getDashboardStats(int $userLevel): array
     {
         $stats = [];
+        
+        // Get current user's kurir ID if they are a courier
+        $kurirId = null;
+        if ($userLevel === USER_LEVEL_COURIER) {
+            $kurirId = $this->getCurrentUserKurirId();
+        }
 
-        // Common statistics for all users
-        $stats['total_shipments'] = $this->pengirimanModel->countAll();
-        $stats['pending_shipments'] = $this->pengirimanModel->where('status', 1)->countAllResults(); // Pending
-        $stats['delivered_shipments'] = $this->pengirimanModel->where('status', 3)->countAllResults(); // Delivered  
-        $stats['in_transit_shipments'] = $this->pengirimanModel->where('status', 2)->countAllResults(); // In Transit
+        // Apply kurir filter for courier users
+        if ($kurirId) {
+            // Statistics filtered by courier
+            $stats['total_shipments'] = $this->pengirimanModel->where('id_kurir', $kurirId)->countAllResults();
+            $stats['pending_shipments'] = $this->pengirimanModel->where('status', 1)->where('id_kurir', $kurirId)->countAllResults(); // Pending
+            $stats['delivered_shipments'] = $this->pengirimanModel->where('status', 3)->where('id_kurir', $kurirId)->countAllResults(); // Delivered  
+            $stats['in_transit_shipments'] = $this->pengirimanModel->where('status', 2)->where('id_kurir', $kurirId)->countAllResults(); // In Transit
+            $stats['canceled_shipments'] = $this->pengirimanModel->where('status', 4)->where('id_kurir', $kurirId)->countAllResults(); // Canceled
+        } else {
+            // Common statistics for admin and gudang users
+            $stats['total_shipments'] = $this->pengirimanModel->countAll();
+            $stats['pending_shipments'] = $this->pengirimanModel->where('status', 1)->countAllResults(); // Pending
+            $stats['delivered_shipments'] = $this->pengirimanModel->where('status', 3)->countAllResults(); // Delivered  
+            $stats['in_transit_shipments'] = $this->pengirimanModel->where('status', 2)->countAllResults(); // In Transit
+            $stats['canceled_shipments'] = $this->pengirimanModel->where('status', 4)->countAllResults(); // Canceled
+        }
 
-        // Time-based statistics
-        $stats['today_shipments'] = $this->pengirimanModel->where('DATE(tanggal)', date('Y-m-d'))->countAllResults();
-        $stats['this_week_shipments'] = $this->pengirimanModel->where('WEEK(tanggal)', date('W'))->where('YEAR(tanggal)', date('Y'))->countAllResults();
-        $stats['this_month_shipments'] = $this->pengirimanModel->where('MONTH(tanggal)', date('m'))->where('YEAR(tanggal)', date('Y'))->countAllResults();
+        // Time-based statistics (also filtered by kurir if applicable)
+        if ($kurirId) {
+            $stats['today_shipments'] = $this->pengirimanModel->where('DATE(tanggal)', date('Y-m-d'))->where('id_kurir', $kurirId)->countAllResults();
+            $stats['this_week_shipments'] = $this->pengirimanModel->where('WEEK(tanggal)', date('W'))->where('YEAR(tanggal)', date('Y'))->where('id_kurir', $kurirId)->countAllResults();
+            $stats['this_month_shipments'] = $this->pengirimanModel->where('MONTH(tanggal)', date('m'))->where('YEAR(tanggal)', date('Y'))->where('id_kurir', $kurirId)->countAllResults();
+        } else {
+            $stats['today_shipments'] = $this->pengirimanModel->where('DATE(tanggal)', date('Y-m-d'))->countAllResults();
+            $stats['this_week_shipments'] = $this->pengirimanModel->where('WEEK(tanggal)', date('W'))->where('YEAR(tanggal)', date('Y'))->countAllResults();
+            $stats['this_month_shipments'] = $this->pengirimanModel->where('MONTH(tanggal)', date('m'))->where('YEAR(tanggal)', date('Y'))->countAllResults();
+        }
 
-        // Previous period comparisons
-        $stats['last_month_shipments'] = $this->pengirimanModel
-            ->where('MONTH(tanggal)', date('m', strtotime('-1 month')))
-            ->where('YEAR(tanggal)', date('Y', strtotime('-1 month')))
-            ->countAllResults();
+        // Previous period comparisons (also filtered by kurir if applicable)
+        if ($kurirId) {
+            $stats['last_month_shipments'] = $this->pengirimanModel
+                ->where('MONTH(tanggal)', date('m', strtotime('-1 month')))
+                ->where('YEAR(tanggal)', date('Y', strtotime('-1 month')))
+                ->where('id_kurir', $kurirId)
+                ->countAllResults();
+        } else {
+            $stats['last_month_shipments'] = $this->pengirimanModel
+                ->where('MONTH(tanggal)', date('m', strtotime('-1 month')))
+                ->where('YEAR(tanggal)', date('Y', strtotime('-1 month')))
+                ->countAllResults();
+        }
 
         // Calculate growth percentages
         if ($stats['last_month_shipments'] > 0) {
@@ -105,8 +136,8 @@ class DashboardController extends BaseController
                 $stats['monthly_trends'] = $this->getMonthlyTrends();
                 break;
 
-            case USER_LEVEL_FINANCE: // Finance
-                // Finance can see customer and shipment statistics
+            case USER_LEVEL_COURIER: // Kurir
+                // Kurir can see customer and shipment statistics
                 $stats['total_customers'] = $this->pelangganModel->countAll();
                 $stats['delivery_rate'] = $stats['total_shipments'] > 0 ? 
                     round(($stats['delivered_shipments'] / $stats['total_shipments']) * 100, 1) : 0;
@@ -126,24 +157,61 @@ class DashboardController extends BaseController
     }
 
     /**
+     * Get current user's kurir ID based on direct relationship
+     */
+    private function getCurrentUserKurirId(): ?string
+    {
+        $userId = session()->get('id_user');
+        if (!$userId) {
+            return null;
+        }
+        
+        // Option 2: Find kurir by user ID (direct relationship)
+        $kurirModel = new \App\Models\KurirModel();
+        $kurir = $kurirModel->getByUserId($userId);
+        
+        return $kurir ? $kurir->id_kurir : null;
+    }
+
+    /**
      * Get monthly shipment trends for the last 12 months
      */
     private function getMonthlyTrends(): array
     {
         $trends = [];
         
+        // Get current user's kurir ID if they are a courier
+        $userLevel = session()->get('level');
+        $kurirId = null;
+        if ($userLevel === USER_LEVEL_COURIER) {
+            $kurirId = $this->getCurrentUserKurirId();
+        }
+        
         for ($i = 11; $i >= 0; $i--) {
             $date = date('Y-m', strtotime("-{$i} months"));
             $month = date('M', strtotime("-{$i} months"));
             
-            $total = $this->pengirimanModel
-                ->where("DATE_FORMAT(tanggal, '%Y-%m')", $date)
-                ->countAllResults();
-                
-            $delivered = $this->pengirimanModel
-                ->where("DATE_FORMAT(tanggal, '%Y-%m')", $date)
-                ->where('status', SHIPMENT_STATUS_DELIVERED) // Delivered
-                ->countAllResults();
+            if ($kurirId) {
+                $total = $this->pengirimanModel
+                    ->where("DATE_FORMAT(tanggal, '%Y-%m')", $date)
+                    ->where('id_kurir', $kurirId)
+                    ->countAllResults();
+                    
+                $delivered = $this->pengirimanModel
+                    ->where("DATE_FORMAT(tanggal, '%Y-%m')", $date)
+                    ->where('status', SHIPMENT_STATUS_DELIVERED) // Delivered
+                    ->where('id_kurir', $kurirId)
+                    ->countAllResults();
+            } else {
+                $total = $this->pengirimanModel
+                    ->where("DATE_FORMAT(tanggal, '%Y-%m')", $date)
+                    ->countAllResults();
+                    
+                $delivered = $this->pengirimanModel
+                    ->where("DATE_FORMAT(tanggal, '%Y-%m')", $date)
+                    ->where('status', SHIPMENT_STATUS_DELIVERED) // Delivered
+                    ->countAllResults();
+            }
             
             $trends[] = [
                 'month' => $month,
@@ -162,10 +230,22 @@ class DashboardController extends BaseController
     {
         $activities = [];
         
-        // Get recent shipments
-        $recentShipments = $this->pengirimanModel
+        // Get current user's kurir ID if they are a courier
+        $kurirId = null;
+        if ($userLevel === USER_LEVEL_COURIER) {
+            $kurirId = $this->getCurrentUserKurirId();
+        }
+        
+        // Get recent shipments (filtered by kurir if applicable)
+        $query = $this->pengirimanModel
             ->select('pengiriman.*, pelanggan.nama as nama_pelanggan')
-            ->join('pelanggan', 'pelanggan.id_pelanggan = pengiriman.id_pelanggan')
+            ->join('pelanggan', 'pelanggan.id_pelanggan = pengiriman.id_pelanggan');
+            
+        if ($kurirId) {
+            $query->where('pengiriman.id_kurir', $kurirId);
+        }
+        
+        $recentShipments = $query
             ->orderBy('pengiriman.tanggal', 'DESC')
             ->limit(5)
             ->asArray() 
@@ -176,6 +256,7 @@ class DashboardController extends BaseController
                 1 => 'created', // Pending
                 2 => 'updated to in transit', // In Transit
                 3 => 'delivered', // Delivered
+                4 => 'canceled', // Canceled
                 default => 'updated'
             };
             
@@ -183,6 +264,7 @@ class DashboardController extends BaseController
                 1 => 'warning', // Pending
                 2 => 'info', // In Transit
                 3 => 'success', // Delivered
+                4 => 'danger', // Canceled
                 default => 'secondary'
             };
 
@@ -215,13 +297,8 @@ class DashboardController extends BaseController
                 ];
                 break;
 
-            case 2: // Finance
-                $actions[] = [
-                    'title' => 'Generate Report',
-                    'url' => base_url('/laporan'),
-                    'icon' => 'fas fa-chart-bar',
-                    'class' => 'btn-outline-primary'
-                ];
+            case 2: // Kurir
+                // No specific actions for Kurir role
                 break;
 
             case 3: // Gudang
@@ -267,29 +344,62 @@ class DashboardController extends BaseController
     {
         $distribution = [];
         
-        $distribution[] = [
-            'label' => 'Pending',
-            'value' => $this->pengirimanModel->where('status', 1)->countAllResults(),
-            'color' => '#ffc107'
-        ];
+        // Get current user's kurir ID if they are a courier
+        $userLevel = session()->get('level');
+        $kurirId = null;
+        if ($userLevel === USER_LEVEL_COURIER) {
+            $kurirId = $this->getCurrentUserKurirId();
+        }
         
-        $distribution[] = [
-            'label' => 'In Transit',
-            'value' => $this->pengirimanModel->where('status', 2)->countAllResults(),
-            'color' => '#17a2b8'
-        ];
-        
-        $distribution[] = [
-            'label' => 'Delivered',
-            'value' => $this->pengirimanModel->where('status', 3)->countAllResults(),
-            'color' => '#28a745'
-        ];
-        
-        $distribution[] = [
-            'label' => 'Cancelled',
-            'value' => $this->pengirimanModel->where('status', 4)->countAllResults(),
-            'color' => '#dc3545'
-        ];
+        if ($kurirId) {
+            $distribution[] = [
+                'label' => 'Pending',
+                'value' => $this->pengirimanModel->where('status', 1)->where('id_kurir', $kurirId)->countAllResults(),
+                'color' => '#ffc107'
+            ];
+            
+            $distribution[] = [
+                'label' => 'In Transit',
+                'value' => $this->pengirimanModel->where('status', 2)->where('id_kurir', $kurirId)->countAllResults(),
+                'color' => '#17a2b8'
+            ];
+            
+            $distribution[] = [
+                'label' => 'Delivered',
+                'value' => $this->pengirimanModel->where('status', 3)->where('id_kurir', $kurirId)->countAllResults(),
+                'color' => '#28a745'
+            ];
+            
+            $distribution[] = [
+                'label' => 'Cancelled',
+                'value' => $this->pengirimanModel->where('status', 4)->where('id_kurir', $kurirId)->countAllResults(),
+                'color' => '#dc3545'
+            ];
+        } else {
+            $distribution[] = [
+                'label' => 'Pending',
+                'value' => $this->pengirimanModel->where('status', 1)->countAllResults(),
+                'color' => '#ffc107'
+            ];
+            
+            $distribution[] = [
+                'label' => 'In Transit',
+                'value' => $this->pengirimanModel->where('status', 2)->countAllResults(),
+                'color' => '#17a2b8'
+            ];
+            
+            $distribution[] = [
+                'label' => 'Delivered',
+                'value' => $this->pengirimanModel->where('status', 3)->countAllResults(),
+                'color' => '#28a745'
+            ];
+            
+            $distribution[] = [
+                'label' => 'Cancelled',
+                'value' => $this->pengirimanModel->where('status', 4)->countAllResults(),
+                'color' => '#dc3545'
+            ];
+        }
         
         return $distribution;
     }

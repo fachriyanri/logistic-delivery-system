@@ -18,6 +18,7 @@ class KurirModel extends Model
         'jenis_kelamin',
         'telepon',
         'alamat',
+        'id_user',  // Add this for Option 2
         'created_at',
         'updated_at'
     ];
@@ -103,6 +104,14 @@ class KurirModel extends Model
     public function getByField(string $field, string $value): ?KurirEntity
     {
         return $this->where($field, $value)->first();
+    }
+
+    /**
+     * Get kurir by user ID
+     */
+    public function getByUserId(string $userId): ?KurirEntity
+    {
+        return $this->where('id_user', $userId)->first();
     }
 
     /**

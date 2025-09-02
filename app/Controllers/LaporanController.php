@@ -21,7 +21,7 @@ class LaporanController extends BaseController
 
     public function index()
     {
-        // Allow admin (level 1) and finance (level 2) to access reports
+        // Allow admin (level 1) and kurir (level 2) to access reports
         $userLevel = session()->get('level');
         if (!in_array($userLevel, [1, 2])) {
             return redirect()->to('/dashboard')->with('error', 'Akses ditolak. Anda tidak memiliki izin untuk mengakses laporan.');
@@ -64,7 +64,7 @@ class LaporanController extends BaseController
 
     public function exportExcel()
     {
-        // Allow admin (level 1) and finance (level 2) to export
+        // Allow admin (level 1) and kurir (level 2) to export
         $userLevel = session()->get('level');
         if (!in_array($userLevel, [1, 2])) {
             return redirect()->to('/dashboard')->with('error', 'Akses ditolak. Anda tidak memiliki izin untuk mengekspor laporan.');

@@ -208,11 +208,11 @@ class PengirimanControllerTest extends DatabaseTestCase
         $this->assertTrue($session->has('success'));
     }
 
-    public function testRoleBasedAccessForFinanceUser(): void
+    public function testRoleBasedAccessForKurirUser(): void
     {
         $this->loginAsUser('testfinance');
         
-        // Finance should be able to view shipments
+        // Kurir should be able to view shipments
         $result = $this->get('/pengiriman');
         $result->assertOK();
         

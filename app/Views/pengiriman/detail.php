@@ -14,7 +14,7 @@
             <a href="<?= base_url('pengiriman') ?>" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Kembali
             </a>
-            <?php if (session('level') == 1 || session('level') == 3): ?>
+            <?php if (session('level') == 1 || session('level') == 2 || session('level') == 3): ?>
             <a href="<?= base_url('pengiriman/edit/' . $pengiriman->id_pengiriman) ?>" class="btn btn-warning">
                 <i class="fas fa-edit"></i> Edit
             </a>

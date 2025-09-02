@@ -46,7 +46,7 @@ class CustomRules
      */
     public function valid_user_level(string $str, ?string $error = null): bool
     {
-        $validLevels = [USER_LEVEL_ADMIN, USER_LEVEL_FINANCE, USER_LEVEL_GUDANG];
+        $validLevels = [USER_LEVEL_ADMIN, USER_LEVEL_COURIER, USER_LEVEL_GUDANG];
         return in_array((int) $str, $validLevels);
     }
 

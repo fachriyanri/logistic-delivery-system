@@ -58,8 +58,8 @@ class TestDataPreparation extends CIUnitTestCase
             ],
             [
                 'id_user' => 'FIN01',
-                'username' => 'financepuninar',
-                'password' => password_hash('FinancePuninar123', PASSWORD_DEFAULT),
+                'username' => 'kurirpuninar',
+                'password' => password_hash('KurirPuninar123', PASSWORD_DEFAULT),
                 'level' => 2,
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
@@ -433,7 +433,7 @@ class TestDataPreparation extends CIUnitTestCase
 
         $report .= "\n=== USER ACCOUNT CREDENTIALS ===\n";
         $report .= "Admin User    : adminpuninar / AdminPuninar123\n";
-        $report .= "Finance User  : financepuninar / FinancePuninar123\n";
+        $report .= "Kurir User   : kurirpuninar / KurirPuninar123\n";
         $report .= "Gudang User   : gudangpuninar / GudangPuninar123\n";
         $report .= "Test User     : testuser01 / TestUser123\n";
 

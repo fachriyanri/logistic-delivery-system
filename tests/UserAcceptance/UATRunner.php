@@ -36,10 +36,10 @@ class UATRunner
                 'A2' => 'System Configuration and Monitoring',
                 'A3' => 'Complete Business Workflow Management'
             ],
-            'finance' => [
-                'F1' => 'Financial Reporting and Analysis',
-                'F2' => 'Customer Relationship Management',
-                'F3' => 'Read-Only Inventory Access'
+            'kurir' => [
+                'K1' => 'Kurir Reporting and Analysis',
+                'K2' => 'Customer Relationship Management',
+                'K3' => 'Read-Only Inventory Access'
             ],
             'gudang' => [
                 'G1' => 'Inventory Management Operations',
@@ -154,7 +154,7 @@ class UATRunner
                     $result = $this->executeAdminScenario($scenarioId);
                     break;
                 case 'finance':
-                    $result = $this->executeFinanceScenario($scenarioId);
+                    $result = $this->executeKurirScenario($scenarioId);
                     break;
                 case 'gudang':
                     $result = $this->executeGudangScenario($scenarioId);
@@ -220,7 +220,7 @@ class UATRunner
     /**
      * Execute finance scenarios
      */
-    private function executeFinanceScenario(string $scenarioId): array
+    private function executeKurirScenario(string $scenarioId): array
     {
         switch ($scenarioId) {
             case 'F1': // Financial Reporting

@@ -69,8 +69,8 @@ class UserCredentialService
             ],
             [
                 'id_user' => 'USR02',
-                'username' => 'financepuninar',
-                'password' => 'FinancePuninar123',
+                'username' => 'kurirpuninar',
+                'password' => 'KurirPuninar123',
                 'level' => 2
             ],
             [

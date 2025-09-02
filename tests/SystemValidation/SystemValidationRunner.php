@@ -261,7 +261,7 @@ class SystemValidationRunner
     private function generateDetailedAnalysis(): string
     {
         $analysis = "### Functionality Testing\n";
-        $analysis .= "Comprehensive testing was performed across all three user roles (Admin, Finance, Gudang) ";
+        $analysis .= "Comprehensive testing was performed across all three user roles (Admin, Kurir, Gudang) ";
         $analysis .= "to ensure proper access controls and functionality availability.\n\n";
 
         $analysis .= "### Security Testing\n";

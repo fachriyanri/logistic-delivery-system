@@ -79,6 +79,7 @@ class PengirimanService
      * 
      * Retrieves shipments from database with optional filtering, pagination, and sorting.
      * Supports filtering by date range, status, customer, courier, and other criteria.
+     * Automatically applies role-based filtering for courier users.
      * 
      * @param array  $filter    Filter criteria (date_from, date_to, status, customer_id, etc.)
      * @param int    $limit     Number of records to retrieve (default: 15)
@@ -105,7 +106,32 @@ class PengirimanService
      */
     public function getAllShipments(array $filter = [], int $limit = 15, int $offset = 0, string $orderBy = 'id_pengiriman', string $orderType = 'DESC'): array
     {
+        // Apply role-based filtering for courier users
+        $userLevel = session()->get('level');
+        if ($userLevel === USER_LEVEL_COURIER) {
+            $kurirId = $this->getCurrentUserKurirId();
+            if ($kurirId) {
+                $filter['id_kurir'] = $kurirId;
+            }
+        }
+        
         return $this->pengirimanModel->getAllWithFilter($filter, $limit, $offset, $orderBy, $orderType);
+    }
+
+    /**
+     * Get current user's kurir ID based on direct relationship
+     */
+    private function getCurrentUserKurirId(): ?string
+    {
+        $userId = session()->get('id_user');
+        if (!$userId) {
+            return null;
+        }
+        
+        // Option 2: Find kurir by user ID (direct relationship)
+        $kurir = $this->kurirModel->getByUserId($userId);
+        
+        return $kurir ? $kurir->id_kurir : null;
     }
 
     /**
@@ -168,8 +194,9 @@ class PengirimanService
                 $data['id_pengiriman'] = $this->pengirimanModel->generateNextId();
             }
 
-            // Validate shipment data
-            $validationErrors = $this->validateShipmentData($data);
+            // Validate shipment data with user level
+            $userLevel = session()->get('level');
+            $validationErrors = $this->validateShipmentData($data, '', $userLevel);
             if (!empty($validationErrors)) {
                 $result['message'] = implode(', ', $validationErrors);
                 return $result;
@@ -244,17 +271,20 @@ class PengirimanService
             // Remove id_pengiriman from update data
             unset($data['id_pengiriman']);
 
-            // Validate shipment data
+            // Validate shipment data with user level
             $data['id_pengiriman'] = $id; // Add for validation context
-            $validationErrors = $this->validateShipmentData($data, $id);
+            $userLevel = session()->get('level');
+            log_message('debug', 'PengirimanService::updateShipment - User level from session: ' . $userLevel);
+            log_message('debug', 'PengirimanService::updateShipment - Data before validation: ' . json_encode($data));
+            $validationErrors = $this->validateShipmentData($data, $id, $userLevel);
             if (!empty($validationErrors)) {
                 $result['message'] = implode(', ', $validationErrors);
                 return $result;
             }
             unset($data['id_pengiriman']); // Remove again for update
 
-            // Validate details if provided
-            if (!empty($details)) {
+            // Validate details if provided and user is not courier
+            if (!empty($details) && $userLevel != 2) {
                 $detailErrors = $this->validateShipmentDetails($details);
                 if (!empty($detailErrors)) {
                     $result['message'] = implode(', ', $detailErrors);
@@ -270,8 +300,8 @@ class PengirimanService
                 throw new \Exception('Gagal memperbarui pengiriman');
             }
 
-            // Update details if provided
-            if (!empty($details)) {
+            // Update details if provided and user is not courier
+            if (!empty($details) && $userLevel != 2) {
                 if (!$this->detailModel->saveShipmentDetails($id, $details)) {
                     throw new \Exception('Gagal memperbarui detail pengiriman');
                 }
@@ -431,11 +461,40 @@ class PengirimanService
     /**
      * Validate shipment data
      */
-    public function validateShipmentData(array $data, string $id = ''): array
+    public function validateShipmentData(array $data, string $id = '', int $userLevel = null): array
     {
         $errors = [];
-
-        // Validate required fields
+        
+        // Get user level from session if not provided
+        if ($userLevel === null) {
+            $userLevel = session()->get('level');
+        }
+        
+        // Debug logging
+        log_message('debug', 'PengirimanService::validateShipmentData - User Level: ' . $userLevel);
+        log_message('debug', 'PengirimanService::validateShipmentData - Data: ' . json_encode($data));
+        
+        // For courier users (level 2), only validate status and detail_location
+        if ($userLevel == 2 || $userLevel === 2 || $userLevel === '2') {
+            log_message('debug', 'PengirimanService::validateShipmentData - Courier validation mode');
+            
+            // Validate status if provided
+            if (!empty($data['status']) && !in_array($data['status'], array_keys(PengirimanEntity::getStatusOptions()))) {
+                $errors[] = 'Status tidak valid';
+            }
+            
+            // Validate detail_location length if provided
+            if (!empty($data['detail_location']) && strlen($data['detail_location']) > 255) {
+                $errors[] = 'Detail lokasi maksimal 255 karakter';
+            }
+            
+            log_message('debug', 'PengirimanService::validateShipmentData - Courier validation errors: ' . json_encode($errors));
+            return $errors;
+        }
+        
+        // For admin and gudang users, validate all required fields
+        log_message('debug', 'PengirimanService::validateShipmentData - Admin/Gudang validation mode');
+        
         if (empty($data['tanggal'])) {
             $errors[] = 'Tanggal harus diisi';
         }
@@ -480,6 +539,10 @@ class PengirimanService
         if (!empty($data['no_kendaraan']) && strlen($data['no_kendaraan']) > 8) {
             $errors[] = 'Nomor kendaraan maksimal 8 karakter';
         }
+        
+        if (!empty($data['detail_location']) && strlen($data['detail_location']) > 255) {
+            $errors[] = 'Detail lokasi maksimal 255 karakter';
+        }
 
         // Validate status if provided
         if (!empty($data['status']) && !in_array($data['status'], array_keys(PengirimanEntity::getStatusOptions()))) {
@@ -488,9 +551,10 @@ class PengirimanService
 
         // Validate status requirements
         // Note: penerima field has been removed from forms as per user request
-        // Only keterangan is required for non-pending statuses
+        // Only keterangan is required for non-pending statuses for admin/gudang users
         if (!empty($data['status']) && $data['status'] != PengirimanEntity::STATUS_PENDING) {
-            if (empty($data['keterangan'])) {
+            // Only require keterangan for admin/gudang users, not for couriers
+            if ($userLevel != 2 && empty($data['keterangan'])) {
                 $errors[] = 'Keterangan harus diisi untuk status ini';
             }
         }

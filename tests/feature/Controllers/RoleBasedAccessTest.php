@@ -49,11 +49,11 @@ class RoleBasedAccessTest extends DatabaseTestCase
         }
     }
 
-    public function testFinanceUserAccessRestrictions(): void
+    public function testKurirUserAccessRestrictions(): void
     {
-        $this->loginAsUser('testfinance');
+        $this->loginAsUser('testkurir');
         
-        // Finance should access these modules
+        // Kurir should access these modules
         $allowedModules = [
             '/dashboard',
             '/pengiriman',
@@ -65,11 +65,11 @@ class RoleBasedAccessTest extends DatabaseTestCase
             $result = $this->get($module);
             $this->assertTrue(
                 $result->isOK() || ($result->isRedirect() && $result->getRedirectUrl() !== '/auth/login'),
-                "Finance should be able to access {$module}"
+                "Kurir should be able to access {$module}"
             );
         }
 
-        // Finance should NOT access these modules (or have limited access)
+        // Kurir should NOT access these modules (or have limited access)
         $restrictedModules = [
             '/user',
             '/user/create',
@@ -80,7 +80,7 @@ class RoleBasedAccessTest extends DatabaseTestCase
             $this->assertTrue(
                 $result->getStatusCode() === 403 || 
                 $result->isRedirect(),
-                "Finance should have restricted access to {$module}"
+                "Kurir should have restricted access to {$module}"
             );
         }
     }
@@ -125,11 +125,11 @@ class RoleBasedAccessTest extends DatabaseTestCase
         }
     }
 
-    public function testFinanceCannotCreateOrDeleteShipments(): void
+    public function testKurirCannotCreateOrDeleteShipments(): void
     {
-        $this->loginAsUser('testfinance');
+        $this->loginAsUser('testkurir');
         
-        // Finance might be able to view create page but not actually create
+        // Kurir might be able to view create page but not actually create
         $createData = [
             'tanggal' => date('Y-m-d'),
             'id_pelanggan' => 'PLG001',
@@ -145,7 +145,7 @@ class RoleBasedAccessTest extends DatabaseTestCase
             $result->isRedirect()
         );
 
-        // Finance should not be able to delete
+        // Kurir should not be able to delete
         $deleteResult = $this->post('/pengiriman/delete/PGR001');
         $this->assertTrue(
             $deleteResult->getStatusCode() === 403 || 
@@ -187,7 +187,7 @@ class RoleBasedAccessTest extends DatabaseTestCase
         $adminResult = $this->get('/user');
         $this->assertTrue($adminResult->isOK() || $adminResult->isRedirect());
 
-        // Finance should fail admin-only checks
+        // Kurir should fail admin-only checks
         $this->get('/auth/logout');
         $this->loginAsUser('testfinance');
         $financeResult = $this->get('/user');
@@ -215,7 +215,7 @@ class RoleBasedAccessTest extends DatabaseTestCase
         $adminApiResult = $this->get('/api/users');
         $this->assertTrue($adminApiResult->isOK() || $adminApiResult->getStatusCode() === 404);
 
-        // Finance should have limited API access
+        // Kurir should have limited API access
         $this->get('/auth/logout');
         $this->loginAsUser('testfinance');
         $financeApiResult = $this->get('/api/users');
@@ -232,7 +232,7 @@ class RoleBasedAccessTest extends DatabaseTestCase
         
         $this->loginAsUser('testfinance');
         
-        // Finance user should see shipment data
+        // Kurir user should see shipment data
         $result = $this->get('/pengiriman');
         $result->assertOK();
         $result->assertSee('PGR001');
@@ -245,7 +245,7 @@ class RoleBasedAccessTest extends DatabaseTestCase
         if ($viewResult->isOK()) {
             $content = $viewResult->response()->getBody();
             // This depends on your UI implementation
-            // Finance users might not see edit/delete buttons
+            // Kurir users might not see edit/delete buttons
         }
     }
 

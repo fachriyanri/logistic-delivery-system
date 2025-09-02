@@ -104,7 +104,7 @@ class UserWorkflowTest extends DatabaseTestCase
         // Logout admin
         $this->get('/auth/logout');
 
-        // Test Finance workflow
+        // Test Kurir workflow
         $this->runRoleSpecificWorkflow('testfinance', 2, [
             '/dashboard',
             '/pengiriman',

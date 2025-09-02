@@ -88,10 +88,10 @@ class UserModelTest extends DatabaseTestCase
         $this->assertCount(1, $adminUsers);
         $this->assertEquals('testadmin', $adminUsers[0]->username);
 
-        $financeUsers = $this->userModel->getUsersByLevel(2);
-        $this->assertIsArray($financeUsers);
-        $this->assertCount(1, $financeUsers);
-        $this->assertEquals('testfinance', $financeUsers[0]->username);
+        $kurirUsers = $this->userModel->getUsersByLevel(2);
+        $this->assertIsArray($kurirUsers);
+        $this->assertCount(1, $kurirUsers);
+        $this->assertEquals('testkurir', $kurirUsers[0]->username);
     }
 
     public function testValidationRules(): void

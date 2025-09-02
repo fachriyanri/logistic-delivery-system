@@ -371,7 +371,7 @@ class ReportWorkflowTest extends DatabaseTestCase
         $this->loginAsUser('testfinance');
         $financeReportResult = $this->get('/laporan');
         
-        // Finance should have access to reports
+        // Kurir should have access to reports
         $this->assertTrue(
             $financeReportResult->isOK() || 
             $financeReportResult->isRedirect()

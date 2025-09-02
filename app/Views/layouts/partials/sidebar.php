@@ -52,8 +52,8 @@ $currentUri = uri_string();
                 </li>
                 <?php endif; ?>
 
-                <!-- Customer Management (Admin & Finance) -->
-                <?php if ($userLevel == 1 || $userLevel == 2): ?>
+                <!-- Customer Management (Admin only) -->
+                <?php if ($userLevel == 1): ?>
                 <li class="nav-item">
                     <a class="nav-link <?= (strpos($currentUri, 'pelanggan') !== false) ? 'active' : '' ?>" 
                        href="<?= base_url('/pelanggan') ?>">
@@ -162,8 +162,8 @@ $currentUri = uri_string();
                 </li>
                 <?php endif; ?>
 
-                <!-- Customer Management (Admin & Finance) -->
-                <?php if ($userLevel == 1 || $userLevel == 2): ?>
+                <!-- Customer Management (Admin only) -->
+                <?php if ($userLevel == 1): ?>
                 <li class="nav-item">
                     <a class="nav-link <?= (strpos($currentUri, 'pelanggan') !== false) ? 'active' : '' ?>" 
                        href="<?= base_url('/pelanggan') ?>"

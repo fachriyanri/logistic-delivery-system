@@ -41,7 +41,7 @@ class RoleFilter implements FilterInterface
             $requiredLevel = (int) $arguments[0];
             
             // Check if user has required role level
-            // Lower level numbers have higher privileges (1 = Admin, 2 = Finance, 3 = Gudang)
+            // Lower level numbers have higher privileges (1 = Admin, 2 = Kurir, 3 = Gudang)
             if ($userLevel === null || $userLevel > $requiredLevel) {
                 // If it's an AJAX request, return JSON response
                 if ($request->isAJAX()) {

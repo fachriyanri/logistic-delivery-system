@@ -12,6 +12,7 @@ class KurirEntity extends Entity
         'jenis_kelamin' => null,
         'telepon' => null,
         'alamat' => null,
+        'id_user' => null,  // Add this for Option 2
     ];
 
     protected $casts = [
@@ -20,6 +21,7 @@ class KurirEntity extends Entity
         'jenis_kelamin' => 'string',
         'telepon' => 'string',
         'alamat' => '?string',
+        'id_user' => '?string',  // Add this for Option 2
     ];
 
     protected $datamap = [];
@@ -138,6 +140,22 @@ class KurirEntity extends Entity
     {
         // This will be checked in the model/service layer
         return true;
+    }
+
+    /**
+     * Get the user ID for this kurir
+     */
+    public function getUserId(): ?string
+    {
+        return $this->attributes['id_user'] ?? null;
+    }
+
+    /**
+     * Check if kurir has a linked user account
+     */
+    public function hasUser(): bool
+    {
+        return !empty($this->getUserId());
     }
 
     /**

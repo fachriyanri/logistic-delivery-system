@@ -103,7 +103,7 @@ define('EVENT_PRIORITY_HIGH', 10);
 
 // User Levels
 defined('USER_LEVEL_ADMIN')   || define('USER_LEVEL_ADMIN', 1);
-defined('USER_LEVEL_FINANCE') || define('USER_LEVEL_FINANCE', 2);
+defined('USER_LEVEL_COURIER') || define('USER_LEVEL_COURIER', 2);
 defined('USER_LEVEL_GUDANG')  || define('USER_LEVEL_GUDANG', 3);
 
 // Shipment Status

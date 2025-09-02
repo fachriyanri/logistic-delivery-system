@@ -10,7 +10,7 @@ This document outlines comprehensive test scenarios for User Acceptance Testing 
 - Clean database with migrated data
 - Three test user accounts configured:
   - Admin: `adminpuninar` / `AdminPuninar123`
-  - Finance: `financepuninar` / `FinancePuninar123`
+  - Kurir: `kurirpuninar` / `KurirPuninar123`
   - Gudang: `gudangpuninar` / `GudangPuninar123`
 - Sample test data loaded
 - All system components deployed and configured
@@ -88,7 +88,7 @@ This document outlines comprehensive test scenarios for User Acceptance Testing 
 - Export functions work in all formats
 - QR codes generate and scan correctly
 
-## Finance User Test Scenarios
+## Kurir User Test Scenarios
 
 ### Scenario F1: Financial Reporting and Analysis
 **Objective:** Validate finance user can access and generate financial reports
@@ -243,9 +243,9 @@ This document outlines comprehensive test scenarios for User Acceptance Testing 
 3. **Gudang:** Create shipment order
 4. **Gudang:** Generate delivery note and QR code
 5. **Gudang:** Update shipment status to "In Transit"
-6. **Finance:** Generate shipment invoice
+6. **Kurir:** Generate shipment invoice
 7. **Gudang:** Mark shipment as delivered
-8. **Finance:** Generate completion report
+8. **Kurir:** Generate completion report
 9. **Admin:** Review complete transaction audit
 
 **Expected Results:**
@@ -260,11 +260,11 @@ This document outlines comprehensive test scenarios for User Acceptance Testing 
 
 **Test Steps:**
 1. **Multiple Users:** Login simultaneously from different browsers
-2. **Admin & Finance:** Access same customer record simultaneously
-3. **Gudang & Finance:** View same shipment simultaneously
+2. **Admin & Kurir:** Access same customer record simultaneously
+3. **Gudang & Kurir:** View same shipment simultaneously
 4. **Admin:** Modify user permissions while user is active
 5. **All Users:** Generate reports on same data set
-6. **Gudang:** Update inventory while Finance views reports
+6. **Gudang:** Update inventory while Kurir views reports
 
 **Expected Results:**
 - Concurrent access works without conflicts

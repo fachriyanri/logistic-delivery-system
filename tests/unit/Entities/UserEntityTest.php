@@ -57,7 +57,7 @@ class UserEntityTest extends CIUnitTestCase
         $this->assertTrue($this->userEntity->hasRole('gudang'));
     }
 
-    public function testHasRoleForFinance(): void
+    public function testHasRoleForKurir(): void
     {
         $this->userEntity->level = 2;
         
@@ -93,7 +93,7 @@ class UserEntityTest extends CIUnitTestCase
         $this->assertEquals('Admin', $this->userEntity->getLevelName());
 
         $this->userEntity->level = 2;
-        $this->assertEquals('Finance', $this->userEntity->getLevelName());
+        $this->assertEquals('Kurir', $this->userEntity->getLevelName());
 
         $this->userEntity->level = 3;
         $this->assertEquals('Gudang', $this->userEntity->getLevelName());

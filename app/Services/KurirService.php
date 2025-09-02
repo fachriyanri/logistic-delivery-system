@@ -220,6 +220,7 @@ class KurirService
             $kurirData = $data;
             unset($kurirData['username']);
             $kurirData['password'] = ''; // Temporary empty password until migration is run
+            $kurirData['id_user'] = $userId; // Link to the user record for Option 2
 
             // Save courier
             $saveResult = $this->kurirModel->saveKurir($kurirData);

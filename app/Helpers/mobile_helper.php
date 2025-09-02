@@ -138,7 +138,7 @@ if (!function_exists('generate_mobile_nav_items')) {
             ];
         }
         
-        // Customer Management (Admin & Finance)
+        // Customer Management (Admin & Kurir)
         if ($userLevel == 1 || $userLevel == 2) {
             $items[] = [
                 'title' => 'Customers',
@@ -160,7 +160,7 @@ if (!function_exists('generate_mobile_nav_items')) {
             'active' => strpos(uri_string(), 'pengiriman') !== false
         ];
         
-        // Reports (Admin & Finance)
+        // Reports (Admin & Kurir)
         if ($userLevel == 1 || $userLevel == 2) {
             $items[] = [
                 'section' => 'Reports'

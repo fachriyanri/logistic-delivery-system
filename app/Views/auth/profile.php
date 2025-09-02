@@ -73,7 +73,7 @@
                                    value="<?php
                                        switch($user['level']) {
                                            case 1: echo 'Admin'; break;
-                                           case 2: echo 'Finance'; break;
+                                           case 2: echo 'Kurir'; break;
                                            case 3: echo 'Gudang'; break;
                                            default: echo 'Unknown';
                                        }

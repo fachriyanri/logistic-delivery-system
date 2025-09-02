@@ -44,8 +44,8 @@ class ComprehensiveSystemTest extends CIUnitTestCase
         // Test Admin functionality
         $this->testAdminFunctionality();
         
-        // Test Finance functionality
-        $this->testFinanceFunctionality();
+        // Test Kurir functionality
+        $this->testKurirFunctionality();
         
         // Test Gudang functionality
         $this->testGudangFunctionality();
@@ -91,23 +91,23 @@ class ComprehensiveSystemTest extends CIUnitTestCase
     }
 
     /**
-     * Test Finance user functionality
+     * Test Kurir user functionality
      */
-    private function testFinanceFunctionality(): void
+    private function testKurirFunctionality(): void
     {
-        echo "Testing Finance functionality...\n";
+        echo "Testing Kurir functionality...\n";
         
-        // Login as finance
+        // Login as kurir
         $session = session();
         $session->set([
-            'user_id' => 'FIN01',
-            'username' => 'financepuninar',
+            'user_id' => 'KUR01',
+            'username' => 'kurirpuninar',
             'level' => 2,
             'logged_in' => true
         ]);
 
-        $financeTests = [
-            'Financial Reports Access' => $this->testFinancialReportsAccess(),
+        $kurirTests = [
+            'Kurir Reports Access' => $this->testKurirReportsAccess(),
             'Shipping Records View' => $this->testShippingRecordsView(),
             'Customer Management Access' => $this->testCustomerManagementAccess(),
             'Read-only Inventory Access' => $this->testReadOnlyInventoryAccess(),
@@ -115,9 +115,9 @@ class ComprehensiveSystemTest extends CIUnitTestCase
             'Dashboard Analytics' => $this->testDashboardAnalytics()
         ];
 
-        $this->testResults['Finance'] = $financeTests;
+        $this->testResults['Kurir'] = $kurirTests;
         
-        foreach ($financeTests as $test => $result) {
+        foreach ($kurirTests as $test => $result) {
             $status = $result ? '✅' : '❌';
             echo "  {$status} {$test}\n";
         }
@@ -315,11 +315,11 @@ class ComprehensiveSystemTest extends CIUnitTestCase
         }
     }
 
-    // Finance user tests
-    private function testFinancialReportsAccess(): bool
+    // Kurir user tests
+    private function testKurirReportsAccess(): bool
     {
         try {
-            $response = $this->get('/laporan/financial');
+            $response = $this->get('/laporan/kurir');
             return $response->getStatusCode() === 200;
         } catch (\Exception $e) {
             return false;

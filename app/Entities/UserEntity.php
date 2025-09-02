@@ -83,11 +83,11 @@ class UserEntity extends Entity
     }
 
     /**
-     * Check if user is finance
+     * Check if user is courier
      */
-    public function isFinance(): bool
+    public function isCourier(): bool
     {
-        return $this->attributes['level'] === USER_LEVEL_FINANCE;
+        return $this->attributes['level'] === USER_LEVEL_COURIER;
     }
 
     /**
@@ -105,7 +105,7 @@ class UserEntity extends Entity
     {
         $levels = [
             USER_LEVEL_ADMIN => 'Administrator',
-            USER_LEVEL_FINANCE => 'Finance',
+            USER_LEVEL_COURIER => 'Kurir',
             USER_LEVEL_GUDANG => 'Gudang'
         ];
 
@@ -129,11 +129,11 @@ class UserEntity extends Entity
     }
 
     /**
-     * Check if user can access finance functions
+     * Check if user can access courier functions
      */
-    public function canAccessFinance(): bool
+    public function canAccessCourier(): bool
     {
-        return $this->isAdmin() || $this->isFinance();
+        return $this->isAdmin() || $this->isCourier();
     }
 
     /**

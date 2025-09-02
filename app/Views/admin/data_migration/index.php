@@ -138,7 +138,7 @@
                                         <small>
                                             <strong>Default Users:</strong><br>
                                             • Admin: adminpuninar / AdminPuninar123<br>
-                                            • Finance: financepuninar / FinancePuninar123<br>
+                                            • Kurir: kurirpuninar / KurirPuninar123<br>
                                             • Gudang: gudangpuninar / GudangPuninar123
                                         </small>
                                     </div>

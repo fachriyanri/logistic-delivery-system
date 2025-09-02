@@ -128,7 +128,7 @@
                     'progress' => 85
                 ],
                 'sparkline' => [30, 35, 42, 48, 52, 58, 65, 62, 68, 75, 78, 82],
-                'url' => base_url('/pengiriman?status=delivered')
+                'url' => base_url('/pengiriman?search=&status=3&tanggal_dari=&tanggal_sampai=')
             ]) ?>
         </div>
 
@@ -145,11 +145,45 @@
                     'period' => 'vs last month'
                 ],
                 'sparkline' => [25, 28, 22, 18, 15, 12, 18, 22, 19, 16, 14, 11],
-                'url' => base_url('/pengiriman?status=pending')
+                'url' => base_url('/pengiriman?search=&status=1&tanggal_dari=&tanggal_sampai=')
             ]) ?>
         </div>
 
-        <?php if (session('level') != 3): // Hide customers for gudang role ?>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <?= component('analytics_card', [
+                'title' => 'In Transit Shipment',
+                'value' => $stats['in_transit_shipments'] ?? 0,
+                'subtitle' => 'In transit shipments',
+                'icon' => 'fas fa-truck',
+                'color' => 'info',
+                'trend' => [
+                    'value' => '+12%',
+                    'direction' => 'up',
+                    'period' => 'vs last month'
+                ],
+                'sparkline' => [15, 18, 22, 19, 25, 28, 32, 29, 35, 38, 42, 45],
+                'url' => base_url('/pengiriman?search=&status=2&tanggal_dari=&tanggal_sampai=')
+            ]) ?>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-3">
+            <?= component('analytics_card', [
+                'title' => 'Dashboard',
+                'value' => $stats['canceled_shipments'] ?? 0,
+                'subtitle' => 'Canceled shipments',
+                'icon' => 'fas fa-times-circle',
+                'color' => 'danger',
+                'trend' => [
+                    'value' => '-2%',
+                    'direction' => 'down',
+                    'period' => 'vs last month'
+                ],
+                'sparkline' => [8, 6, 4, 7, 5, 3, 2, 4, 6, 3, 2, 1],
+                'url' => base_url('/pengiriman?search=&status=4&tanggal_dari=&tanggal_sampai=')
+            ]) ?>
+        </div>
+
+        <?php if (session('level') == 1): // Only show customers for Admin ?>
         <div class="col-xl-3 col-md-6 mb-3">
             <?= component('analytics_card', [
                 'title' => 'Customers',
@@ -170,6 +204,7 @@
     </div>
 
     <!-- Quick Actions -->
+    <?php if (session('level') == 1): // Only show for Admin ?>
     <div class="row mb-4">
         <div class="col-12">
             <div class="card">
@@ -241,8 +276,10 @@
             </div>
         </div>
     </div>
+    <?php endif; ?>
 
     <!-- Charts Section -->
+    <?php if (session('level') == 1): // Only show for Admin ?>
     <div class="row mb-4">
         <div class="col-lg-8 mb-4">
             <div class="card">
@@ -350,10 +387,11 @@
             </div>
         </div>
     </div>
+    <?php endif; ?>
 
     <!-- Recent Activity and System Status -->
     <div class="row">
-        <div class="col-lg-8 mb-4">
+        <div class="<?= session('level') == 1 ? 'col-lg-8' : 'col-lg-12' ?> mb-4">
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title">
@@ -390,6 +428,7 @@
             </div>
         </div>
 
+        <?php if (session('level') == 1): // Only show System Status for Admin ?>
         <div class="col-lg-4 mb-4">
             <div class="card">
                 <div class="card-header">
@@ -443,6 +482,7 @@
                 </div>
             </div>
         </div>
+        <?php endif; ?>
     </div>
 </div>
 <?= $this->endSection() ?>

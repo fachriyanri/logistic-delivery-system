@@ -191,7 +191,7 @@ class UserModel extends Model
     {
         $levels = [
             USER_LEVEL_ADMIN => 'Administrator',
-            USER_LEVEL_FINANCE => 'Finance',
+            USER_LEVEL_COURIER => 'Kurir',
             USER_LEVEL_GUDANG => 'Gudang'
         ];
 

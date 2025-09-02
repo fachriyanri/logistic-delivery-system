@@ -53,7 +53,7 @@ ls -la writable/
 | Role | Username | Password | Level |
 |------|----------|----------|-------|
 | Admin | adminpuninar | AdminPuninar123 | 1 |
-| Finance | financepuninar | FinancePuninar123 | 2 |
+| Kurir | kurirpuninar | KurirPuninar123 | 2 |
 | Gudang | gudangpuninar | GudangPuninar123 | 3 |
 | Test User | testuser01 | TestUser123 | 3 |
 
@@ -127,7 +127,7 @@ vendor/bin/phpunit tests/SystemValidation/SystemValidationRunner.php::runQuickVa
 - Data saves correctly and displays properly
 - Reports generate accurate information
 
-#### Finance User Testing (2 hours)
+#### Kurir User Testing (2 hours)
 
 **Setup:**
 1. Login as `financepuninar`
@@ -207,7 +207,7 @@ vendor/bin/phpunit tests/SystemValidation/SystemValidationRunner.php::runQuickVa
 1. **Complete Order Lifecycle**
    - Admin creates customer/courier
    - Gudang creates shipment
-   - Finance generates invoice
+   - Kurir generates invoice
    - Gudang completes delivery
    - All roles verify final status
 
@@ -311,7 +311,7 @@ Actual Result:
 
 Environment:
 - Browser: [Browser and version]
-- User Role: [Admin/Finance/Gudang]
+- User Role: [Admin/Kurir/Gudang]
 - Date/Time: [When issue occurred]
 
 Screenshots/Evidence:

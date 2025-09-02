@@ -33,7 +33,7 @@ class DashboardControllerTest extends DatabaseTestCase
         $result->assertSee('Pengiriman Selesai');
     }
 
-    public function testDashboardDisplaysForAuthenticatedFinance(): void
+    public function testDashboardDisplaysForAuthenticatedKurir(): void
     {
         $this->loginAsUser('testfinance');
         
@@ -41,7 +41,7 @@ class DashboardControllerTest extends DatabaseTestCase
         
         $result->assertOK();
         $result->assertSee('Dashboard');
-        // Finance user should see relevant statistics
+        // Kurir user should see relevant statistics
         $result->assertSee('Total Pengiriman');
     }
 
@@ -142,7 +142,7 @@ class DashboardControllerTest extends DatabaseTestCase
         $this->loginAsUser('testfinance');
         $financeResult = $this->get('/dashboard');
         $financeResult->assertOK();
-        // Finance might see different content or same content with different permissions
+        // Kurir might see different content or same content with different permissions
         $financeResult->assertSee('Dashboard');
     }
 

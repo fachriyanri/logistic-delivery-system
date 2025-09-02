@@ -133,7 +133,7 @@ class FinalSystemValidator
         $validations = [
             '3.1 Three User Levels Implementation' => $this->checkUserLevels(),
             '3.2 Admin Access Control' => $this->checkAdminAccess(),
-            '3.3 Finance Access Control' => $this->checkFinanceAccess(),
+            '3.3 Kurir Access Control' => $this->checkKurirAccess(),
             '3.4 Gudang Access Control' => $this->checkGudangAccess(),
             '3.5 Default User Accounts' => $this->checkDefaultUsers(),
             '3.6 Password Encryption' => $this->checkPasswordEncryption(),
@@ -338,7 +338,7 @@ class FinalSystemValidator
                $this->checkFileExists('app/Controllers/Admin/DataMigrationController.php');
     }
 
-    private function checkFinanceAccess(): bool
+    private function checkKurirAccess(): bool
     {
         return $this->checkFileExists('app/Controllers/DashboardController.php');
     }
@@ -987,7 +987,7 @@ class FinalSystemValidator
         $handover .= "- **Architecture Pattern:** MVC with Service Layer\n\n";
 
         $handover .= "## Key Features\n\n";
-        $handover .= "- Three-tier user management (Admin, Finance, Gudang)\n";
+        $handover .= "- Three-tier user management (Admin, Kurir, Gudang)\n";
         $handover .= "- Complete logistics workflow management\n";
         $handover .= "- QR code generation and scanning\n";
         $handover .= "- Responsive mobile interface\n";
@@ -998,7 +998,7 @@ class FinalSystemValidator
         $handover .= "| Role | Username | Password | Level |\n";
         $handover .= "|------|----------|----------|-------|\n";
         $handover .= "| Admin | adminpuninar | AdminPuninar123 | 1 |\n";
-        $handover .= "| Finance | financepuninar | FinancePuninar123 | 2 |\n";
+        $handover .= "| Kurir | kurirpuninar | KurirPuninar123 | 2 |\n";
         $handover .= "| Gudang | gudangpuninar | GudangPuninar123 | 3 |\n\n";
 
         $handover .= "## Directory Structure\n\n";

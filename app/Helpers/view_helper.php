@@ -236,7 +236,7 @@ if (!function_exists('get_user_role_name')) {
     {
         return match($level) {
             USER_LEVEL_ADMIN => 'Administrator',
-            USER_LEVEL_FINANCE => 'Finance',
+            USER_LEVEL_COURIER => 'Kurir',
             USER_LEVEL_GUDANG => 'Warehouse',
             default => 'Unknown'
         };

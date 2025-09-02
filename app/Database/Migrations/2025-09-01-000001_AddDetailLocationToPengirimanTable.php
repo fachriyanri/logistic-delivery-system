@@ -10,13 +10,13 @@ class AddDetailLocationToPengirimanTable extends Migration
     {
         $fields = [
             'detail_location' => [
-                'type'       => 'VARCHAR',
+                'type' => 'VARCHAR',
                 'constraint' => 255,
-                'null'       => true,
-                'after'      => 'no_po'
+                'null' => true,
+                'after' => 'no_po'
             ]
         ];
-        
+
         $this->forge->addColumn('pengiriman', $fields);
     }
 
