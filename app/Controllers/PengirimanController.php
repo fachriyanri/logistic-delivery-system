@@ -111,7 +111,9 @@ class PengirimanController extends BaseController
         $id = $post['id'] ?? '';
         $action = $post['action'] ?? 'save';
 
-        // Prepare shipment data
+        // Prepare shipment data based on user role
+        $userLevel = session('level');
+        
         $data = [
             'id_pengiriman' => $post['id_pengiriman'] ?? '',
             'tanggal' => $post['tanggal'] ?? '',
@@ -120,8 +122,14 @@ class PengirimanController extends BaseController
             'no_po' => $post['no_po'] ?? '',
             'no_kendaraan' => $post['no_kendaraan'] ?? '',
             'status' => (int) ($post['status'] ?? 1),
-            'keterangan' => $post['keterangan'] ?? ''
+            'keterangan' => $post['keterangan'] ?? '',
+            'detail_location' => $post['detail_location'] ?? ''
         ];
+        
+        // Only add penerima field for courier users (level 2)
+        if ($userLevel == 2) {
+            $data['penerima'] = $post['penerima'] ?? '';
+        }
 
         // Prepare details data
         $details = [];
@@ -510,10 +518,11 @@ class PengirimanController extends BaseController
         log_message('debug', 'PengirimanController::update - User Level: ' . $userLevel);
         
         if ($userLevel == 2) {
-            // Level 2 (Kurir) can only update status and detail_location
+            // Level 2 (Kurir) can only update status, detail_location, and penerima
             $data = [
                 'status' => (int) ($post['status'] ?? 1),
-                'detail_location' => $post['detail_location'] ?? ''
+                'detail_location' => $post['detail_location'] ?? '',
+                'penerima' => $post['penerima'] ?? ''
             ];
             
             // Don't allow details update for couriers
@@ -522,7 +531,7 @@ class PengirimanController extends BaseController
             log_message('debug', 'PengirimanController::update - Courier restricted update: ' . json_encode($data));
             log_message('debug', 'PengirimanController::update - Session level check: ' . session('level') . ' == 2');
         } else {
-            // Admin/Gudang can update all fields
+            // Admin/Gudang can update all fields except penerima (that's only for couriers)
             $data = [
                 'tanggal' => $post['tanggal'] ?? '',
                 'id_pelanggan' => $post['id_pelanggan'] ?? '',

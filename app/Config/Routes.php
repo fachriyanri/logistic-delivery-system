@@ -6,7 +6,7 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 $routes->setDefaultNamespace('App\Controllers');
-$routes->setDefaultController('Home');
+$routes->setDefaultController('HomeController');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
 $routes->set404Override();
@@ -18,8 +18,12 @@ $routes->setAutoRoute(false);
  * --------------------------------------------------------------------
  */
 
+// Public Routes
+$routes->get('/', 'HomeController::index');
+$routes->get('/track', 'HomeController::track');
+$routes->get('/track/detail/(:segment)', 'HomeController::trackDetail/$1');
+$routes->get('pengiriman/track/(:segment)', 'PengirimanController::track/$1');
 // Authentication Routes
-$routes->get('/', 'AuthController::index');
 $routes->get('/login', 'AuthController::index');
 $routes->post('/login', 'AuthController::authenticate');
 $routes->get('/logout', 'AuthController::logout');
@@ -132,7 +136,6 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->delete('pengiriman/delete/(:segment)', 'PengirimanController::delete/$1');
     $routes->get('pengiriman/delivery-note/(:segment)', 'PengirimanController::deliveryNote/$1');
     $routes->post('pengiriman/update-status/(:segment)', 'PengirimanController::updateStatus/$1');
-    $routes->get('pengiriman/track/(:segment)', 'PengirimanController::track/$1');
     $routes->get('pengiriman/export', 'PengirimanController::export');
     $routes->post('pengiriman/generate-code', 'PengirimanController::generateCode');
     $routes->get('pengiriman/generatePO', 'PengirimanController::generatePO');
@@ -180,11 +183,11 @@ $routes->group('api', static function ($routes) {
 
 // Mobile Routes
 $routes->group('mobile', static function ($routes) {
-    $routes->get('track/(:segment)', 'Api\QRController::mobileTrack/$1');
+    $routes->get('shipment-track/(:segment)', 'Api\QRController::mobileTrack/$1');
 });
 
-// Public tracking route
-$routes->get('track/(:segment)', 'Api\QRController::mobileTrack/$1');
+// Public tracking route for mobile with specific ID format
+$routes->get('mobile-track/(:segment)', 'Api\QRController::mobileTrack/$1');
 
 // Admin Routes (Protected)
 $routes->group('admin', ['filter' => 'role:1'], static function ($routes) {

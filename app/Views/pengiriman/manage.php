@@ -168,6 +168,24 @@
                             <?php endif; ?>
                         </div>
 
+                        <?php if (session('level') == 2): ?>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="penerima" class="form-label">Penerima</label>
+                                    <input type="text" class="form-control <?= isset($validation) && $validation->hasError('penerima') ? 'is-invalid' : '' ?>"
+                                        id="penerima" name="penerima"
+                                        value="<?= old('penerima', $pengiriman->penerima ?? '') ?>"
+                                        placeholder="Nama penerima barang (opsional)">
+                                    <?php if (isset($validation) && $validation->hasError('penerima')): ?>
+                                        <div class="invalid-feedback"><?= $validation->getError('penerima') ?></div>
+                                    <?php endif; ?>
+                                    <div class="form-text">Field ini opsional, isi jika barang sudah diterima</div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
                         <div class="mb-3">
                             <label for="keterangan" class="form-label">Keterangan</label>
                             <textarea class="form-control" id="keterangan" name="keterangan" rows="3"
@@ -291,10 +309,11 @@
                     <small class="text-muted">
                         <strong>Tips:</strong><br>
                         <?php if (session('level') == 2): ?>
-                        • Sebagai kurir, Anda hanya dapat mengubah status dan detail lokasi<br>
+                        • Sebagai kurir, Anda hanya dapat mengubah status, detail lokasi, dan penerima<br>
                         • Field lain tidak dapat diubah dan bersifat informasi saja<br>
                         • Pastikan status pengiriman diperbarui sesuai kondisi terkini<br>
-                        • Detail lokasi membantu pelacakan pengiriman
+                        • Detail lokasi membantu pelacakan pengiriman<br>
+                        • Penerima bersifat opsional - isi jika barang sudah diterima
                         <?php else: ?>
                         • ID Pengiriman akan dibuat otomatis jika dikosongkan<br>
                         • No PO akan dibuat otomatis untuk pengiriman baru<br>

@@ -228,9 +228,9 @@ class AuthController extends BaseController
         $this->session->destroy();
 
         if ($this->request->isAJAX()) {
-            return $this->jsonSuccess('Logged out successfully', ['redirect' => '/login']);
+            return $this->jsonSuccess('Logged out successfully', ['redirect' => '/']);
         }
 
-        return redirect()->to('/login')->with('success', 'You have been logged out successfully');
+        return redirect()->to('/')->with('success', 'You have been logged out successfully');
     }
 }

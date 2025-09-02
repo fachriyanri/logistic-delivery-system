@@ -168,7 +168,7 @@
 
         <div class="col-xl-3 col-md-6 mb-3">
             <?= component('analytics_card', [
-                'title' => 'Dashboard',
+                'title' => 'Canceled',
                 'value' => $stats['canceled_shipments'] ?? 0,
                 'subtitle' => 'Canceled shipments',
                 'icon' => 'fas fa-times-circle',

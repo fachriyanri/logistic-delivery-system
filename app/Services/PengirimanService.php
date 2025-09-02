@@ -549,15 +549,7 @@ class PengirimanService
             $errors[] = 'Status tidak valid';
         }
 
-        // Validate status requirements
-        // Note: penerima field has been removed from forms as per user request
-        // Only keterangan is required for non-pending statuses for admin/gudang users
-        if (!empty($data['status']) && $data['status'] != PengirimanEntity::STATUS_PENDING) {
-            // Only require keterangan for admin/gudang users, not for couriers
-            if ($userLevel != 2 && empty($data['keterangan'])) {
-                $errors[] = 'Keterangan harus diisi untuk status ini';
-            }
-        }
+        // Note: Keterangan validation removed - it's now optional for all users and statuses
 
         return $errors;
     }
