@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Sep 01, 2025 at 06:04 AM
+-- Generation Time: Sep 02, 2025 at 10:48 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -69,14 +69,15 @@ CREATE TABLE `detail_pengiriman` (
 --
 
 INSERT INTO `detail_pengiriman` (`id_detail`, `id_pengiriman`, `id_barang`, `qty`, `created_at`, `updated_at`) VALUES
-(1, 'KRM20160820001', 'BRG0001', 1, '2025-08-18 05:01:14', '2025-08-18 05:01:14'),
-(2, 'KRM20160820001', 'BRG0002', 3, '2025-08-18 05:01:14', '2025-08-18 05:01:14'),
 (3, 'KRM20250827001', 'BRG0005', 2, '2025-08-27 00:46:57', '2025-08-27 00:46:57'),
 (4, 'KRM20250827002', 'BRG0004', 2, '2025-08-27 00:56:00', '2025-08-27 00:56:00'),
 (21, 'KRM20250829001', 'BRG0001', 2, '2025-08-29 19:57:09', '2025-08-29 19:57:09'),
 (22, 'KRM20250829001', 'BRG0004', 1, '2025-08-29 19:57:09', '2025-08-29 19:57:09'),
-(24, 'KRM20250828001', 'BRG0001', 4, '2025-09-01 12:57:05', '2025-09-01 12:57:05'),
-(25, 'KRM20250901001', 'BRG0006', 3, '2025-09-01 13:03:51', '2025-09-01 13:03:51');
+(33, 'KRM20250901001', 'BRG0006', 3, '2025-09-01 16:49:59', '2025-09-01 16:49:59'),
+(36, 'KRM20250828001', 'BRG0001', 4, '2025-09-02 15:48:24', '2025-09-02 15:48:24'),
+(37, 'KRM20250828001', 'BRG0004', 3, '2025-09-02 15:48:24', '2025-09-02 15:48:24'),
+(38, 'KRM20160820001', 'BRG0001', 1, '2025-09-02 15:51:14', '2025-09-02 15:51:14'),
+(39, 'KRM20160820001', 'BRG0002', 3, '2025-09-02 15:51:14', '2025-09-02 15:51:14');
 
 -- --------------------------------------------------------
 
@@ -115,6 +116,7 @@ CREATE TABLE `kurir` (
   `jenis_kelamin` varchar(10) COLLATE utf8mb4_general_ci NOT NULL,
   `telepon` varchar(15) COLLATE utf8mb4_general_ci NOT NULL,
   `alamat` varchar(150) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id_user` varchar(5) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -123,13 +125,13 @@ CREATE TABLE `kurir` (
 -- Dumping data for table `kurir`
 --
 
-INSERT INTO `kurir` (`id_kurir`, `nama`, `jenis_kelamin`, `telepon`, `alamat`, `created_at`, `updated_at`) VALUES
-('KRR01', 'EKO', 'Laki-Laki', '081385195955', 'TANGERANG SELATAN', '2025-08-18 05:01:14', '2025-09-01 12:48:42'),
-('KRR02', 'ERIK', 'Laki-Laki', '081284959589', 'TANGERANG', '2025-08-18 05:01:14', '2025-08-18 05:01:14'),
-('KRR03', 'TRIBUDI', 'Laki-Laki', '081219900381', 'TANGERANG', '2025-08-18 05:01:14', '2025-08-18 05:01:14'),
-('KRR04', 'EKI', 'Laki-Laki', '081385195955', 'TANGERANG', '2025-08-18 05:01:14', '2025-08-18 05:01:14'),
-('KRR05', 'AHMAD RIZAL', 'Laki-Laki', '081930100123', 'JAKARTA UTARA', '2025-08-25 23:49:58', '2025-08-25 23:50:13'),
-('KRR06', 'TINA', 'Perempuan', '081385195954', 'BEKASI', '2025-09-01 12:49:47', '2025-09-01 12:49:47');
+INSERT INTO `kurir` (`id_kurir`, `nama`, `jenis_kelamin`, `telepon`, `alamat`, `id_user`, `created_at`, `updated_at`) VALUES
+('KRR01', 'EKO', 'Laki-Laki', '081385195955', 'TANGERANG SELATAN', NULL, '2025-08-18 05:01:14', '2025-09-01 12:48:42'),
+('KRR02', 'ERIK', 'Laki-Laki', '081284959589', 'TANGERANG', NULL, '2025-08-18 05:01:14', '2025-08-18 05:01:14'),
+('KRR03', 'TRIBUDI', 'Laki-Laki', '081219900381', 'TANGERANG', NULL, '2025-08-18 05:01:14', '2025-08-18 05:01:14'),
+('KRR05', 'AHMAD RIZAL', 'Laki-Laki', '081930100123', 'JAKARTA UTARA', 'USR05', '2025-08-25 23:49:58', '2025-08-25 23:50:13'),
+('KRR06', 'TINA', 'Perempuan', '081385195954', 'BEKASI', 'USR06', '2025-09-01 12:49:47', '2025-09-01 12:49:47'),
+('KRR07', 'EKI', 'Laki-Laki', '0856901139017', 'DEPOK', 'USR07', '2025-09-01 16:51:33', '2025-09-01 16:51:33');
 
 -- --------------------------------------------------------
 
@@ -162,7 +164,8 @@ INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`
 (61, '2024-01-01-000008', 'App\\Database\\Migrations\\MigrateExistingData', 'default', 'App', 1755468075, 1),
 (62, '2024-01-01-000009', 'App\\Database\\Migrations\\AddSecurityIndexes', 'default', 'App', 1755468081, 1),
 (63, '2025-08-25-000002', 'App\\Database\\Migrations\\AddIsActiveToUserTable', 'default', 'App', 1756115241, 2),
-(64, '2025-08-25-000003', 'App\\Database\\Migrations\\CreateSettingsTable', 'default', 'App', 1756115386, 3);
+(64, '2025-08-25-000003', 'App\\Database\\Migrations\\CreateSettingsTable', 'default', 'App', 1756115386, 3),
+(65, '2025-09-01-000001', 'App\\Database\\Migrations\\AddUserRelationToKurir', 'default', 'App', 1756720025, 4);
 
 -- --------------------------------------------------------
 
@@ -217,12 +220,12 @@ CREATE TABLE `pengiriman` (
 --
 
 INSERT INTO `pengiriman` (`id_pengiriman`, `tanggal`, `id_pelanggan`, `id_kurir`, `no_kendaraan`, `no_po`, `detail_location`, `keterangan`, `penerima`, `photo`, `status`, `created_at`, `updated_at`) VALUES
-('KRM20160820001', '2016-08-20', 'CST0001', 'KRR05', 'B021ZIG', '8732984732984', NULL, 'barang pecah belah', 'REZA', NULL, 1, '2025-08-18 05:01:14', '2025-08-18 05:01:14'),
+('KRM20160820001', '2016-08-20', 'CST0001', 'KRR05', 'B021ZIG', '8732984732984', '', 'barang pecah belah', 'REZA', NULL, 1, '2025-08-18 05:01:14', '2025-09-02 15:51:14'),
 ('KRM20250827001', '2025-08-27', 'CST0001', 'KRR03', 'B098921', 'PO20250827581', NULL, '', NULL, NULL, 1, NULL, NULL),
 ('KRM20250827002', '2025-08-27', 'CST0003', 'KRR03', 'B092181', 'PO20250827011', 'kalibata', '', NULL, NULL, 1, NULL, NULL),
-('KRM20250828001', '2025-08-28', 'CST0002', 'KRR04', 'B4900QD', 'PO20250828301', '', '', NULL, NULL, 1, NULL, NULL),
+('KRM20250828001', '2025-08-28', 'CST0002', 'KRR06', 'B4900QF', 'PO20250828301', 'TRANSIT DEPOK', '', '', NULL, 2, NULL, '2025-09-02 15:49:36'),
 ('KRM20250829001', '2025-08-29', 'CST0004', 'KRR05', 'B599SBY', 'PO20250829978', '', 'AFTERMARKET', NULL, NULL, 2, NULL, NULL),
-('KRM20250901001', '2025-09-01', 'CST0004', 'KRR02', 'B40910QF', 'PO20250901612', NULL, '', NULL, NULL, 1, '2025-09-01 13:03:51', '2025-09-01 13:03:51');
+('KRM20250901001', '2025-09-01', 'CST0004', 'KRR05', 'B40910QA', 'PO20250901782', 'TRANSIT BEKASI', '', 'AGUS', NULL, 3, '2025-09-01 15:33:01', '2025-09-02 15:44:50');
 
 -- --------------------------------------------------------
 
@@ -280,11 +283,10 @@ CREATE TABLE `user` (
 
 INSERT INTO `user` (`id_user`, `username`, `password`, `level`, `created_at`, `updated_at`, `is_active`) VALUES
 ('USR01', 'adminpuninar', '$argon2id$v=19$m=65536,t=4,p=1$ZXNndFVYdk03MHpUc3FtOA$BJfWQeZ7gBiyoqMSMD3c0uRI22LaEsprX0bxVv1gQlg', 1, '2025-08-18 12:37:33', '2025-08-23 18:34:11', 1),
-('USR02', 'financepuninar', '$argon2id$v=19$m=65536,t=4,p=1$cUVmU2dKaWM1QW51WS9sdA$PSaSauMee7xMPaOjhM7R37c6aEnQw2F9QLpgMUxXrvA', 2, '2025-08-18 12:37:34', '2025-08-25 16:00:35', 1),
-('USR03', 'gudangpuninar', '$argon2id$v=19$m=65536,t=4,p=1$QmF2ODVWLkM3RllEbGFJLw$jaIdYexnUz1/mcZFV7thmwDDYwOwWDbXsrrupW4sfiM', 3, '2025-08-18 12:37:34', '2025-08-18 12:37:34', 1),
 ('USR04', 'ahmadkamil', '$argon2id$v=19$m=65536,t=4,p=1$c0Z4dTZyUlBxUUFSWFplaA$O7KIZ1JX3n6p8sfyvOrvrnGvF+OTFU9T41qkGs/uDrY', 2, '2025-08-25 23:47:31', '2025-08-25 23:47:31', 1),
 ('USR05', 'ahmadrizal', '$argon2id$v=19$m=65536,t=4,p=1$UkZTZXB2eFFJNkV6YjVXRA$Jjv5VJ0Q4KIZMesGY3JElskCWs1Dwgf0+LYzJ6seBDs', 2, '2025-08-25 23:49:58', '2025-08-25 23:49:58', 1),
-('USR06', 'tina', '$argon2id$v=19$m=65536,t=4,p=1$MHJ1bFhTZy52L1hDdHZobw$+HdvYXlCY07asAOIAhnGO4r7b5+cIlajHp3ROi2C8fw', 2, '2025-09-01 12:49:47', '2025-09-01 12:49:47', 1);
+('USR06', 'tina', '$argon2id$v=19$m=65536,t=4,p=1$MHJ1bFhTZy52L1hDdHZobw$+HdvYXlCY07asAOIAhnGO4r7b5+cIlajHp3ROi2C8fw', 2, '2025-09-01 12:49:47', '2025-09-01 12:49:47', 1),
+('USR07', 'eki', '$argon2id$v=19$m=65536,t=4,p=1$eHpOTzVnQ2dNT0JoNzdwZQ$uA+OrjsbWQ0W5rf0vMKInxZkHyKv5TZ43BNyrrqYFP8', 2, '2025-09-01 16:51:33', '2025-09-01 16:51:33', 1);
 
 --
 -- Indexes for dumped tables
@@ -318,7 +320,8 @@ ALTER TABLE `kategori`
 --
 ALTER TABLE `kurir`
   ADD PRIMARY KEY (`id_kurir`),
-  ADD KEY `idx_kurir_nama` (`nama`);
+  ADD KEY `idx_kurir_nama` (`nama`),
+  ADD KEY `kurir_id_user_foreign` (`id_user`);
 
 --
 -- Indexes for table `migrations`
@@ -369,13 +372,13 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `detail_pengiriman`
 --
 ALTER TABLE `detail_pengiriman`
-  MODIFY `id_detail` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id_detail` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
 
 --
 -- AUTO_INCREMENT for table `settings`
@@ -399,6 +402,12 @@ ALTER TABLE `barang`
 ALTER TABLE `detail_pengiriman`
   ADD CONSTRAINT `detail_pengiriman_id_barang_foreign` FOREIGN KEY (`id_barang`) REFERENCES `barang` (`id_barang`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `detail_pengiriman_id_pengiriman_foreign` FOREIGN KEY (`id_pengiriman`) REFERENCES `pengiriman` (`id_pengiriman`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `kurir`
+--
+ALTER TABLE `kurir`
+  ADD CONSTRAINT `kurir_id_user_foreign` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `pengiriman`

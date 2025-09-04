@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($title) ?></title>
     <link REL="SHORTCUT ICON" HREF="https://yusenlogistics-id.com//assets/global/images/logo/logo.png">
-    
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
+
     <style>
         :root {
             --bg-primary: #1a1a1a;
@@ -59,6 +60,35 @@
             border-bottom: 1px solid var(--border-color);
         }
 
+        .table-bordered {
+            --bs-table-bg: var(--bg-secondary);
+            --bs-table-striped-bg: var(--bg-tertiary);
+            border-color: var(--border-color);
+        }
+
+        .table-bordered th,
+        .table-bordered td {
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .table-light {
+            --bs-table-bg: var(--bg-tertiary);
+            --bs-table-color: var(--text-primary);
+        }
+
+        .table-info {
+            --bs-table-bg: rgba(13, 202, 240, 0.2);
+            --bs-table-color: var(--text-primary);
+        }
+
+        /* White text styling for Detail Barang header only */
+        .detail-barang-header {
+            color: #ffffff !important;
+            font-size: 1rem !important;
+            font-weight: 600 !important;
+        }
+
         .table-dark {
             --bs-table-bg: var(--bg-secondary);
             --bs-table-striped-bg: var(--bg-tertiary);
@@ -68,10 +98,21 @@
             font-size: 0.75em;
         }
 
-        .status-pending { background-color: var(--warning-color); }
-        .status-progress { background-color: var(--accent-color); }
-        .status-delivered { background-color: var(--success-color); }
-        .status-cancelled { background-color: var(--danger-color); }
+        .status-pending {
+            background-color: var(--warning-color);
+        }
+
+        .status-progress {
+            background-color: var(--accent-color);
+        }
+
+        .status-delivered {
+            background-color: var(--success-color);
+        }
+
+        .status-cancelled {
+            background-color: var(--danger-color);
+        }
 
         .text-muted {
             color: var(--text-secondary) !important;
@@ -115,6 +156,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark">
@@ -122,11 +164,11 @@
             <a class="navbar-brand" href="<?= base_url('/') ?>">
                 <img src="https://yusenlogistics-id.com/assets/global/images/logo/logo-white.png" alt="Puninar Yusen Logistics" height="40">
             </a>
-            
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
@@ -145,7 +187,7 @@
         <!-- Back Button -->
         <div class="mb-4">
             <a href="<?= base_url('/track') ?>" class="btn btn-outline-light">
-                <i class="fas fa-arrow-left"></i> Back to Search
+                <i class="fas fa-arrow-left"></i> Kembali ke pencarian
             </a>
         </div>
 
@@ -155,46 +197,56 @@
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="mb-0">
-                            <i class="fas fa-shipping-fast"></i> Shipment Information
+                            <i class="fas fa-shipping-fast"></i> Informasi Pengiriman
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="info-row">
-                                    <div class="info-label">Shipment ID</div>
+                                    <div class="info-label">ID Pengiriman</div>
                                     <div class="info-value fw-bold"><?= esc($pengiriman->id_pengiriman) ?></div>
                                 </div>
                                 <div class="info-row">
-                                    <div class="info-label">PO Number</div>
+                                    <div class="info-label">Tanggal</div>
+                                    <div class="info-value"><?= date('d F Y', strtotime($pengiriman->tanggal)) ?></div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">No PO</div>
                                     <div class="info-value"><?= esc($pengiriman->no_po) ?></div>
                                 </div>
                                 <div class="info-row">
-                                    <div class="info-label">Shipment Date</div>
-                                    <div class="info-value"><?= date('d F Y', strtotime($pengiriman->tanggal_pengiriman)) ?></div>
+                                    <div class="info-label">No Kendaraan</div>
+                                    <div class="info-value"><?= esc($pengiriman->no_kendaraan) ?></div>
                                 </div>
+                                <div class="info-row">
+                                    <div class="info-label">Penerima</div>
+                                    <div class="info-value"><?= !empty($pengiriman->penerima) ? esc($pengiriman->penerima) : '-' ?></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
                                 <div class="info-row">
                                     <div class="info-label">Status</div>
                                     <div class="info-value">
                                         <?php
                                         $statusClass = '';
                                         $statusText = '';
-                                        switch($pengiriman->status) {
+                                        switch ($pengiriman->status) {
                                             case 1:
                                                 $statusClass = 'status-pending';
                                                 $statusText = 'Pending';
                                                 break;
                                             case 2:
                                                 $statusClass = 'status-progress';
-                                                $statusText = 'In Transit';
+                                                $statusText = 'Dalam Perjalanan';
                                                 break;
                                             case 3:
                                                 $statusClass = 'status-delivered';
-                                                $statusText = 'Delivered';
+                                                $statusText = 'Terkirim';
                                                 break;
                                             case 4:
                                                 $statusClass = 'status-cancelled';
-                                                $statusText = 'Cancelled';
+                                                $statusText = 'Dibatalkan';
                                                 break;
                                             default:
                                                 $statusClass = 'bg-secondary';
@@ -204,23 +256,17 @@
                                         <span class="badge <?= $statusClass ?>"><?= $statusText ?></span>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
                                 <div class="info-row">
-                                    <div class="info-label">Courier</div>
-                                    <div class="info-value"><?= esc($pengiriman->nama_kurir ?? 'Not assigned') ?></div>
+                                    <div class="info-label">Dibuat</div>
+                                    <div class="info-value"><?= isset($pengiriman->created_at) ? date('d/m/Y H:i', strtotime($pengiriman->created_at)) : '-' ?></div>
                                 </div>
                                 <div class="info-row">
-                                    <div class="info-label">Courier Phone</div>
-                                    <div class="info-value"><?= esc($pengiriman->no_hp_kurir ?? '-') ?></div>
+                                    <div class="info-label">Diupdate</div>
+                                    <div class="info-value"><?= isset($pengiriman->updated_at) ? date('d/m/Y H:i', strtotime($pengiriman->updated_at)) : '-' ?></div>
                                 </div>
                                 <div class="info-row">
-                                    <div class="info-label">Total Weight</div>
-                                    <div class="info-value"><?= number_format($pengiriman->total_berat, 2) ?> kg</div>
-                                </div>
-                                <div class="info-row">
-                                    <div class="info-label">Shipping Cost</div>
-                                    <div class="info-value">Rp <?= number_format($pengiriman->biaya_pengiriman, 0, ',', '.') ?></div>
+                                    <div class="info-label">Keterangan</div>
+                                    <div class="info-value"> <?= !empty($pengiriman->keterangan) ? esc($pengiriman->keterangan) : '-' ?> </div>
                                 </div>
                             </div>
                         </div>
@@ -231,80 +277,93 @@
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="mb-0">
-                            <i class="fas fa-user"></i> Customer Information
+                            <i class="fas fa-user"></i> Informasi Pelanggan
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="info-row">
-                                    <div class="info-label">Sender</div>
-                                    <div class="info-value"><?= esc($pengiriman->nama_pengirim ?? $pengiriman->nama_pelanggan) ?></div>
-                                </div>
-                                <div class="info-row">
-                                    <div class="info-label">Sender Phone</div>
-                                    <div class="info-value"><?= esc($pengiriman->no_hp_pengirim ?? $pengiriman->no_hp_pelanggan) ?></div>
-                                </div>
-                                <div class="info-row">
-                                    <div class="info-label">Origin Address</div>
-                                    <div class="info-value"><?= esc($pengiriman->alamat_asal) ?></div>
-                                </div>
+                                <h6 class="text-primary"><?= esc($pengiriman->nama_pelanggan) ?></h6>
+                                <p class="mb-1">
+                                    <i class="fas fa-map-marker-alt text-muted"></i> 
+                                    <?= esc($pengiriman->alamat_pelanggan) ?>
+                                </p>
+                                <p class="mb-0">
+                                    <i class="fas fa-phone text-muted"></i> 
+                                    <?= esc($pengiriman->telepon_pelanggan) ?>
+                                </p>
                             </div>
                             <div class="col-md-6">
-                                <div class="info-row">
-                                    <div class="info-label">Recipient</div>
-                                    <div class="info-value"><?= esc($pengiriman->penerima) ?></div>
-                                </div>
-                                <div class="info-row">
-                                    <div class="info-label">Recipient Phone</div>
-                                    <div class="info-value"><?= esc($pengiriman->no_hp_penerima) ?></div>
-                                </div>
-                                <div class="info-row">
-                                    <div class="info-label">Destination Address</div>
-                                    <div class="info-value"><?= esc($pengiriman->alamat_tujuan) ?></div>
-                                </div>
+                                <h6 class="text-info">Kurir: <?= esc($pengiriman->nama_kurir) ?></h6>
+                                <p class="mb-1">
+                                    <i class="fas fa-map-marker-alt text-muted"></i> 
+                                    <?= esc($pengiriman->alamat_kurir) ?>
+                                </p>
+                                <p class="mb-0">
+                                    <i class="fas fa-phone text-muted"></i> 
+                                    <?= esc($pengiriman->telepon_kurir) ?>
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Item Details -->
-                <div class="card">
-                    <div class="card-header">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
                         <h5 class="mb-0">
-                            <i class="fas fa-boxes"></i> Item Details
+                            <i class="fas fa-user"></i> Detail Barang
                         </h5>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-dark table-striped mb-0">
-                                <thead>
+                            <table class="table table-bordered">
+                                <thead class="table-light">
                                     <tr>
-                                        <th>Item</th>
-                                        <th>Category</th>
-                                        <th>Quantity</th>
-                                        <th>Weight (kg)</th>
-                                        <th>Notes</th>
+                                        <th width="5%">No</th>
+                                        <th>Nama Barang</th>
+                                        <th>Kategori</th>
+                                        <th width="10%">Jumlah</th>
+                                        <th width="10%">Satuan</th>
+                                        <th width="15%">Harga Satuan</th>
+                                        <th width="15%">Total</th>
+                                        <th>Keterangan</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php if (!empty($detail_pengiriman)): ?>
-                                        <?php foreach ($detail_pengiriman as $detail): ?>
+                                        <?php 
+                                        $totalNilai = 0;
+                                        foreach ($detail_pengiriman as $index => $detail): 
+                                            $subtotal = $detail->qty  * $detail->harga;
+                                            $totalNilai += $subtotal;
+                                        ?>
                                         <tr>
-                                            <td><?= esc($detail->nama_barang) ?></td>
+                                            <td><?= $index + 1 ?></td>
                                             <td>
-                                                <span class="badge bg-info"><?= esc($detail->nama_kategori) ?></span>
+                                                <strong><?= esc($detail->nama_barang) ?></strong>
                                             </td>
-                                            <td><?= number_format($detail->jumlah) ?></td>
-                                            <td><?= number_format($detail->berat, 2) ?></td>
-                                            <td>
-                                                <small class="text-muted"><?= esc($detail->keterangan ?: '-') ?></small>
-                                            </td>
+                                            <td><?= esc($detail->nama_kategori) ?></td>
+                                            <td class="text-center"><?= number_format($detail->qty) ?></td>
+                                            <td class="text-center"><?= esc($detail->satuan) ?></td>
+                                            <td class="text-end">Rp <?= number_format($detail->harga, 0, ',', '.') ?></td>
+                                            <td class="text-end">Rp <?= number_format($subtotal, 0, ',', '.') ?></td>
+                                            <td><?= !empty($detail->keterangan) ? esc($detail->keterangan) : '-' ?></td>
                                         </tr>
                                         <?php endforeach; ?>
+                                        <tr class="table-info">
+                                            <td colspan="6" class="text-end"><strong>Total Nilai:</strong></td>
+                                            <td class="text-end"><strong>Rp <?= number_format($totalNilai, 0, ',', '.') ?></strong></td>
+                                            <td></td>
+                                        </tr>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="5" class="text-center text-muted">No item details available</td>
+                                            <td colspan="8" class="text-center py-4">
+                                                <div class="text-muted">
+                                                    <i class="fas fa-box-open fa-2x mb-2"></i>
+                                                    <p>Tidak ada detail barang</p>
+                                                </div>
+                                            </td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>
@@ -324,12 +383,12 @@
                     </div>
                     <div class="card-body text-center">
                         <?php if (!empty($pengiriman->id_pengiriman)): ?>
-                            <a href="<?= base_url('pengiriman/track/' . $pengiriman->id_pengiriman) ?>" 
-                               class="btn btn-primary btn-lg w-100 mb-3">
+                            <a href="<?= base_url('pengiriman/track/' . $pengiriman->id_pengiriman) ?>"
+                                class="btn btn-primary btn-lg w-100 mb-3">
                                 <i class="fas fa-map-marker-alt"></i> Track Shipment
                             </a>
                         <?php endif; ?>
-                        
+
                         <div class="text-muted">
                             <small>
                                 <i class="fas fa-info-circle"></i>
@@ -357,35 +416,41 @@
                                     </small>
                                 </div>
                             </div>
-                            
+
                             <?php if ($pengiriman->status >= 2): ?>
-                            <div class="timeline-item">
-                                <div class="timeline-marker bg-info"></div>
-                                <div class="timeline-content">
-                                    <h6 class="mb-1">In Transit</h6>
-                                    <small class="text-muted">Package is on the way</small>
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-info"></div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1">In Transit</h6>
+                                        <small class="text-muted">
+                                            <?= isset($pengiriman->updated_at) ? date('d M Y, H:i', strtotime($pengiriman->updated_at)) : 'Package is on the way' ?>
+                                        </small>
+                                    </div>
                                 </div>
-                            </div>
                             <?php endif; ?>
-                            
+
                             <?php if ($pengiriman->status == 3): ?>
-                            <div class="timeline-item">
-                                <div class="timeline-marker bg-success"></div>
-                                <div class="timeline-content">
-                                    <h6 class="mb-1">Delivered</h6>
-                                    <small class="text-muted">Package delivered successfully</small>
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-success"></div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1">Delivered</h6>
+                                        <small class="text-muted">
+                                            <?= isset($pengiriman->updated_at) ? date('d M Y, H:i', strtotime($pengiriman->updated_at)) : 'Package delivered successfully' ?>
+                                        </small>
+                                    </div>
                                 </div>
-                            </div>
                             <?php endif; ?>
-                            
+
                             <?php if ($pengiriman->status == 4): ?>
-                            <div class="timeline-item">
-                                <div class="timeline-marker bg-danger"></div>
-                                <div class="timeline-content">
-                                    <h6 class="mb-1">Cancelled</h6>
-                                    <small class="text-muted">Shipment was cancelled</small>
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-danger"></div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1">Cancelled</h6>
+                                        <small class="text-muted">
+                                            <?= isset($pengiriman->updated_at) ? date('d M Y, H:i', strtotime($pengiriman->updated_at)) : 'Shipment was cancelled' ?>
+                                        </small>
+                                    </div>
                                 </div>
-                            </div>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -443,4 +508,5 @@
         }
     </style>
 </body>
+
 </html>

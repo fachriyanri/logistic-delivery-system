@@ -63,7 +63,7 @@
                                 </tr>
                                 <tr>
                                     <td><strong>Penerima</strong></td>
-                                    <td>: <?= esc($pengiriman->penerima) ?></td>
+                                    <td>: <?= !empty($pengiriman->penerima) ? esc($pengiriman->penerima) : '-' ?></td>
                                 </tr>
                             </table>
                         </div>
